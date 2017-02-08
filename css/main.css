@@ -2,10 +2,10 @@ html { box-sizing: border-box; font-size: 14px; }
 *, *:before, *:after { box-sizing: inherit; font-size:inherit; }
 body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 html, body {padding: 0; margin: 0; }
-
+p { margin: 0 0 1em; }
 #menu { background: #333; padding: 0.5em; }
 
-#timelines { background: #222; padding: 1.5em; margin: 0 0 1em; color: #888; }
+#timelines { display: none; background: #222; padding: 1.5em; margin: 0 0 1em; color: #888; }
 .timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px; transition: all .2s ease;}
 .timeline.hidden { opacity: 0.25; }
 .timeline.last { margin-bottom: 2em; }

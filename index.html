@@ -15,6 +15,7 @@
       <h2>Parameters</h2>
     </div>
     <div class="modal-body">
+      <p>Press ESC, the close button, or click outside to close this dialog.</p>
       <div class="params">
         <table>
         <tr><td><label for="numAttendings">Number of Attendings</label></td><td><input type="text" id="numAttendings" value="2" /></td></tr>
@@ -41,11 +42,8 @@
       <h2>JSON import/export</h2>
     </div>
     <div class="modal-body">
+      <p>Import and export simulation parameters using JSON</p>
       <div style="width:49%;display:inline-block;">
-        <textarea id="txtExport" class="json" rows="20"></textarea>
-        <button class="btn btn-primary" id="btnExportJSON">Export JSON</button>
-      </div>
-      <div style="width:49%;float:right;">
         <textarea id="txtImport" class="json" rows="20">
 {
   "numAttendings": 2,
@@ -221,6 +219,10 @@
         </textarea>
         <button class="btn btn-warning" id="btnLoadJSON">Import JSON</button>
       </div>
+      <div style="width:49%;float:right;">
+        <textarea id="txtExport" class="json" rows="20"></textarea>
+        <button class="btn btn-primary" id="btnExportJSON">Export JSON</button>
+      </div>
     </div>
   </div>
 </div>
@@ -228,7 +230,7 @@
 <div id="menu">
 <button class="btn btn-primary" id="btnShowParams" data-modal="mdlParams">Parameters</button>
 <button class="btn btn-primary" id="btnShowJSON" data-modal="mdlJSON">JSON import/export</button>
-<button class="btn btn-primary" id="btnRunSingle">Run Single</button>
+<button class="btn btn-primary" id="btnRunSingle">Run Simulation</button>
 <button class="btn btn-primary" id="btnRunMonteCarlo">Run Monte Carlo</button>
 </div>
 
@@ -313,7 +315,6 @@ simulationWorker.onmessage = function(message) {
 };
 
 document.getElementById('btnLoadJSON').click();
-document.getElementById('btnRunMonteCarlo').click();
 
 var hist = function(data, min, max, n_bins) {
   var width = (max - min) / (n_bins - 1);
@@ -676,10 +677,11 @@ function showMonteCarloResults(results) {
 
 function visualize(sim) {
 
-  var legend = document.getElementById('legend');
   var timelines = document.getElementById('timelines');
+  timelines.style.display = 'block';
   var scale = 5; // px per minute
   var info = document.getElementById('info');
+
   var createEvent = function(className, start, duration) {
     var event = document.createElement('div');
     var label = (duration + 0.5) | 0;
@@ -742,7 +744,7 @@ function visualize(sim) {
         patientsSeenIds.push(patient.id);
         attendingIds.push(patient.attending.id);
       });
-      timeline.onmouseover = function(e) {
+      label.onmouseover = function(e) {
         highlightTimelines(function(timeline) {
           var id = timeline.getAttribute('data-id');
           return (id == actor.id ||
@@ -750,7 +752,7 @@ function visualize(sim) {
             attendingIds.indexOf(id) !== -1);
         });
       };
-      timeline.onmouseout = resetTimelines;
+      label.onmouseout = resetTimelines;
     }
 
     if (actor.type == 'Attending') {
@@ -760,7 +762,7 @@ function visualize(sim) {
         patientsSeenIds.push(patient.id);
         clinicalTeamIds.push(patient.clinicalTeam.id);
       });
-      timeline.onmouseover = function(e) {
+      label.onmouseover = function(e) {
         highlightTimelines(function(timeline) {
           var dataId = timeline.getAttribute('data-id');
           return (dataId == actor.id ||
@@ -768,7 +770,7 @@ function visualize(sim) {
             clinicalTeamIds.indexOf(timeline.getAttribute('data-id')) !== -1);
         });
       };
-      timeline.onmouseout = resetTimelines;
+      label.onmouseout = resetTimelines;
     }
 
     var events = document.createElement('div');
@@ -792,7 +794,7 @@ function visualize(sim) {
   };
 
   legend.innerHTML = '';
-  timelines.innerHTML = '';
+  timelines.innerHTML = '<p><strong>Hint:</strong> hover over the timeline labels to highlight relationships</p>';
 
   // ticks
   var timeline = createTimeline({
