@@ -1,5 +1,6 @@
 html { box-sizing: border-box; font-size: 14px; }
 *, *:before, *:after { box-sizing: inherit; font-size:inherit; }
+body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 
 .timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px; }
 .timeline.last { margin-bottom: 1em; }

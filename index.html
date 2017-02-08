@@ -290,8 +290,6 @@ document.getElementById('btnRunSingle').addEventListener('click', function() {
   visualize(sim);
 });
 
-document.getElementById('btnLoadJSON').click();
-
 var simulationWorker = new Worker('js/worker.js');
 
 document.getElementById('btnRunMonteCarlo').addEventListener('click', function() {
@@ -311,6 +309,9 @@ simulationWorker.onmessage = function(message) {
     document.getElementById('btnRunMonteCarlo').innerHTML = 'Run Monte Carlo';
   }
 };
+
+document.getElementById('btnLoadJSON').click();
+document.getElementById('btnRunMonteCarlo').click();
 
 var hist = function(data, min, max, n_bins) {
   var width = (max - min) / (n_bins - 1);
@@ -448,8 +449,9 @@ function showMonteCarloResults(results) {
     type: 'scatter',
     mode: 'none',
   }];
-  var layout = getHistLayout(results.times, colors['Patient']);
+  var layout = getHistLayout(results.times, '', colors['Patient']);
   layout.xaxis = getTimeTicks(120, 240);
+  layout.xaxis.title = 'Last patient checked out';
   Plotly.newPlot('pltTimeHist', timeData,layout);
 
   var getPlotDataFromTimeStats = function(x, stats, color) {
@@ -675,14 +677,20 @@ function visualize(sim) {
   var legend = document.getElementById('legend');
   var timelines = document.getElementById('timelines');
   var scale = 5; // px per minute
-
+  var info = document.getElementById('info');
   var createEvent = function(className, start, duration) {
     var event = document.createElement('div');
     var label = (duration + 0.5) | 0;
-    if (className.includes('tick'))
+    if (className.includes('tick')) {
       label = start;
+    } else {
+      event.onmouseover = function() {
+        info.innerHTML = className;
+      };
+    }
     event.appendChild(document.createTextNode(label)); // round to nearest integer
     event.className = className;
+    event.title = className;
     event.style.left = start * scale + 'px';
     event.style.width = duration * scale + 'px';
     return event;
@@ -695,12 +703,6 @@ function visualize(sim) {
     var label = document.createElement('div');
     label.appendChild(document.createTextNode(actor.id));
     label.className = 'label ' + actor.type;
-    label.addEventListener('mouseover', function() {
-      var timeInState = [];
-      for (var state in actor.timeInState)
-        timeInState.push(state + ': ' + ((actor.timeInState[state] + 0.5) | 0));
-      document.getElementById('info').innerHTML = timeInState.join(', ');
-    });
     timeline.appendChild(label);
 
     var events = document.createElement('div');
