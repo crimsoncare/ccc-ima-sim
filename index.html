@@ -682,7 +682,7 @@ function visualize(sim) {
     var event = document.createElement('div');
     var label = (duration + 0.5) | 0;
     if (className.includes('tick')) {
-      label = start;
+      label = Simulation.formatTime(start);
     } else {
       event.onmouseover = function() {
         info.innerHTML = className;
@@ -743,6 +743,14 @@ function visualize(sim) {
       timeline.classList.add('last');
     timelines.appendChild(timeline);
   });
+
+  var timeline = createTimeline({
+    id: '',
+    type: 'time',
+    timeInState: { },
+    timeline: [ ],
+  });
+  timelines.appendChild(timeline);
 
 }
 

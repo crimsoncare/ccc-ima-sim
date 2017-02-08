@@ -2,32 +2,37 @@ html { box-sizing: border-box; font-size: 14px; }
 *, *:before, *:after { box-sizing: inherit; font-size:inherit; }
 body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 
-.timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px; }
-.timeline.last { margin-bottom: 1em; }
+.timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px;}
+.timeline.last { margin-bottom: 2em; }
 .timeline .label { display: inline-block; width: 8em; overflow: hidden; }
-.timeline .events { display: inline-block; position: relative; width: 900px; height: 1.6em; }
+.timeline .events { display: inline-block; position: relative; width: 900px; height: 1.6em;}
 .timeline .events div { position: absolute; top: 0; text-align: center; opacity: 0.9;
-  border: 1px solid #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); border-top: 0; border-bottom: 0; border-right: 0; color: rgba(0,0,0,0.3); }
-.timeline .events div.tick { opacity: 1; border: 0; box-shadow: none; color: transparent; border-left: 1px solid #ccc; }
-.timeline .events.time div.tick { color: #333; text-align: left; padding-left: 0.5em; font-size: 85%; }
+  border: 1px solid #222; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); border-top: 0; border-bottom: 0; border-right: 0; }
 
-.PATIENT_BEFORE_ARRIVAL                              { opacity: 0.2; }
-.PATIENT_CHECKING_IN                                 { background: #ccc; }
-.PATIENT_WAITING_FOR_PREFERRED_CLINICAL_TEAM         { background: hsl(45,90%,80%); }
-.PATIENT_WAITING_FOR_ANY_CLINICAL_TEAM               { background: hsl(25,90%,80%); }
-.PATIENT_CLINICAL_TEAM_MEETING                       { background: hsl(160,60%,50%); }
-.PATIENT_WAITING_FOR_ATTENDING                       { background: hsl(5,90%,80%); }
-.PATIENT_ATTENDING_MEETING                           { background: hsl(200,80%,60%); }
-.PATIENT_CHECKING_OUT                                { background: #ccc; }
-.PATIENT_FINISHED                                    { }
-.CLINICAL_TEAM_GROUP_HUDDLE                          { }
-.CLINICAL_TEAM_WAITING_FOR_PATIENT                   { background: hsl(5,90%,80%); }
-.CLINICAL_TEAM_WAITING_FOR_PREFERRED_ATTENDING       { background: hsl(45,90%,80%); }
-.CLINICAL_TEAM_WAITING_FOR_ANY_ATTENDING             { background: hsl(25,90%,80%); }
-.CLINICAL_TEAM_ATTENDING_MEETING                     { background: hsl(180,80%,50%); }
-.CLINICAL_TEAM_WAITING_FOR_PATIENT_ATTENDING_MEETING { }
-.ATTENDING_WAITING_FOR_CLINICAL_TEAM                 { background: hsl(5,90%,80%); }
-.ATTENDING_WAITING_FOR_PATIENT_ATTENDING_MEETING     { }
+.timeline .events div.tick { opacity: 1; border: 0; box-shadow: none; color: transparent; border-left: 1px solid rgba(127,127,127,0.4); }
+.timeline .events.time div.tick { color: rgba(127,127,127,0.7); text-align: left; padding-left: 0.5em; font-size: 85%; }
+
+.PATIENT_BEFORE_ARRIVAL,
+.ATTENDING_WAITING_FOR_FIRST_CLINICAL_TEAM           { opacity: 0; color: rgba(0,0,0,0.0);}
+.PATIENT_CHECKING_IN, .PATIENT_CHECKING_OUT,
+.CLINICAL_TEAM_GROUP_HUDDLE                          { background: rgba(127,127,127,0.4); color: rgba(0,0,0,0.5); }
+
+.PATIENT_WAITING_FOR_PREFERRED_CLINICAL_TEAM,
+.CLINICAL_TEAM_WAITING_FOR_PREFERRED_ATTENDING       { background: rgba(224,192,0,0.1); box-shadow: inset 0 0 0 1px rgba(224,192,0,0.6) !important; color: rgba(224,192,0,0.5);}
+
+.PATIENT_WAITING_FOR_ANY_CLINICAL_TEAM,
+.CLINICAL_TEAM_WAITING_FOR_ANY_ATTENDING             { background: rgba(255,0,0,0.1); box-shadow: inset 0 0 0 1px rgba(255,0,0,0.6) !important; color: rgba(255,0,0,0.5); }
+
+.PATIENT_CLINICAL_TEAM_MEETING                       { background: rgb(51,153,102); color: rgba(255,255,255,0.5);}
+.CLINICAL_TEAM_ATTENDING_MEETING                     { background: rgb(51,125,135); color: rgba(255,255,255,0.5); }
+.PATIENT_ATTENDING_MEETING                           { background: rgb(51,102,160); color: rgba(255,255,255,0.5); }
+
+
+.PATIENT_WAITING_FOR_ATTENDING,
+.CLINICAL_TEAM_WAITING_FOR_PATIENT,
+.ATTENDING_WAITING_FOR_CLINICAL_TEAM                 { background: rgba(255,96,0,0.1); box-shadow: inset 0 0 0 1px rgba(255,96,0,0.6) !important; color: rgba(255,96,0,0.5); }
+
+
 
 #mc_results .actor { display: inline-block; border: 1px solid #000; margin: 5px; padding: 5px; }
 
@@ -55,4 +60,4 @@ body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 
 textarea.json { width: 100%; height: 100%; font-family: monospace; margin-bottom: 1em; border: 1px solid #ccc; overflow: auto;}
 
-#timelines { background: #fafafa; padding: 0.5em; margin: 0.5em 0; border: 1px solid #ccc; }
+#timelines { background: #222; padding: 1.5em; margin: 0.5em 0; color: #888; }
