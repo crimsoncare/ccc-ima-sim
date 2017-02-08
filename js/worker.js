@@ -131,7 +131,7 @@ function runMonteCarlo(params, numSamps) {
     if (actor.timeInState.hasOwnProperty(first) && actor.timeInState.hasOwnProperty(second)) {
       return getStats(addFloat64Array(
         actor.timeInState[first].samples,
-        actor.timeInState[second].samples,
+        actor.timeInState[second].samples
       ));
     } else if (actor.timeInState.hasOwnProperty(first)) {
       return actor.timeInState[first];
