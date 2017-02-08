@@ -8,6 +8,11 @@ Scheduler.prototype.init = function(sim) {
 
   this.sim = sim;
   var params = this.sim.params;
+
+  this.sim.params.targetTime = 180;
+  this.sim.params.hurryThreshold = 30;
+  this.sim.params.hurryFactor = 0.5;
+
   var actors = this.sim.params.actors;
 
   sim.actors = [ ];
@@ -67,7 +72,10 @@ Scheduler.prototype.init = function(sim) {
 
 Scheduler.prototype.createPatientClinicalTeamMeeting = function(patient, clinicalTeam) {
   var sim = this.sim;
-  var duration = sim.getDuration('pt_ct_meeting_' + patient.caseType);
+  var distName = 'pt_ct_meeting_' + patient.caseType;
+  var duration = sim.getDuration(distName);
+  if (duration > sim.params.hurryThreshold)
+    duration = (duration - sim.params.hurryThreshold) * sim.params.hurryFactor + sim.params.hurryThreshold;
   var stateCode = Actor.stateCodes.PATIENT_CLINICAL_TEAM_MEETING;
   patient.setState(stateCode, sim.time, duration);
   patient.clinicalTeam = clinicalTeam;
@@ -87,7 +95,11 @@ Scheduler.prototype.createClinicalTeamAttendingMeeting = function(clinicalTeam, 
 
 Scheduler.prototype.createPatientAttendingMeeting = function(patient, clinicalTeam, attending) {
   var sim = this.sim;
-  var duration = sim.getDuration('pt_ct_atp_meeting_' + patient.caseType);
+  var distName = 'pt_ct_atp_meeting_' + patient.caseType;
+  var duration = sim.getDuration(distName);
+  var target = sim.params.targetTime - sim.params.distributions['pt_checkout'].mean;
+  if (sim.time + duration > target)
+    duration = (duration - sim.params.distributions[distName].min) * sim.params.hurryFactor + sim.params.distributions[distName].min;
   var stateCode = Actor.stateCodes.PATIENT_ATTENDING_MEETING;
   patient.setState(stateCode, sim.time, duration);
   patient.attending = attending;

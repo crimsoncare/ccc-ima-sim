@@ -20,6 +20,9 @@
         <tr><td><label for="numAttendings">Number of Attendings</label></td><td><input type="text" id="numAttendings" value="2" /></td></tr>
         <tr><td><label for="numClinicalTeams">Number of Clinical Teams</label></td><td><input type="text" id="numClinicalTeams" value="4"  /></td></tr>
         <tr><td><label for="numPatients">Number of Patients</label></td><td><input type="text" id="numPatients" value="8" /></td></tr>
+        <tr><td><label for="targetTime">Target clinic end time (minutes)</label></td><td><input type="text" id="targetTime" value="180" /></td></tr>
+        <tr><td><label for="hurryThreshold">Hurry threshold (minutes)</label></td><td><input type="text" id="hurryThreshold" value="30"  /></td></tr>
+        <tr><td><label for="hurryFactor">Hurry factor (multiplicative)</label></td><td><input type="text" id="hurryFactor" value="0.5" /></td></tr>
         </table>
       </div>
       <div id="confirmParams"><button class="btn btn-warning" id="btnConfirmParams">Confirm changes</button> &nbsp; (this will reset the properties below)</div>
@@ -48,6 +51,9 @@
   "numAttendings": 2,
   "numClinicalTeams": 4,
   "numPatients": 8,
+  "targetTime": 180,
+  "hurryThreshold": 30,
+  "hurryFactor": 0.5,
   "actors": {
     "attendings": [
       {
@@ -77,7 +83,7 @@
         "preferredAttending": "Attending-1",
         "preferredClinicalTeam": "ClinicalTeam-1",
         "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 15
       },
@@ -86,7 +92,7 @@
         "preferredAttending": "Attending-2",
         "preferredClinicalTeam": "ClinicalTeam-2",
         "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 15
       },
@@ -94,8 +100,8 @@
         "id": "Patient-3",
         "preferredAttending": "Attending-1",
         "preferredClinicalTeam": "ClinicalTeam-3",
-        "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "caseType": "btc_fu",
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 30
       },
@@ -103,8 +109,8 @@
         "id": "Patient-4",
         "preferredAttending": "Attending-2",
         "preferredClinicalTeam": "ClinicalTeam-4",
-        "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "caseType": "btc_fu",
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 30
       },
@@ -112,8 +118,8 @@
         "id": "Patient-5",
         "preferredAttending": "Attending-1",
         "preferredClinicalTeam": "ClinicalTeam-1",
-        "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "caseType": "btc_new",
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 60
       },
@@ -121,8 +127,8 @@
         "id": "Patient-6",
         "preferredAttending": "Attending-2",
         "preferredClinicalTeam": "ClinicalTeam-2",
-        "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "caseType": "btc_new",
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 60
       },
@@ -131,7 +137,7 @@
         "preferredAttending": "Attending-1",
         "preferredClinicalTeam": "ClinicalTeam-3",
         "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 75
       },
@@ -140,7 +146,7 @@
         "preferredAttending": "Attending-2",
         "preferredClinicalTeam": "ClinicalTeam-4",
         "caseType": "uc",
-        "maxWaitTimeAttending": 30,
+        "maxWaitTimeAttending": 15,
         "maxWaitTimeClinicalTeam": 30,
         "appointmentTime": 75
       }
@@ -157,57 +163,60 @@
       "min": 1,
       "max": 20,
       "mean": 5,
-      "stdev": 5
+      "stdev": 3
     },
     "pt_arrival_delay": {
       "min": -60,
       "max": 60,
       "mean": -6,
-      "stdev": 10
+      "stdev": 14
     },
     "pt_ct_meeting_btc_new": {
       "min": 15,
       "max": 75,
-      "mean": 40,
-      "stdev": 15
+      "mean": 45,
+      "stdev": 10
     },
     "pt_ct_meeting_btc_fu": {
       "min": 15,
       "max": 75,
       "mean": 30,
-      "stdev": 10
+      "stdev": 5
     },
     "pt_ct_meeting_uc": {
       "min": 15,
       "max": 75,
       "mean": 30,
-      "stdev": 10
+      "stdev": 8
     },
     "ct_atp_meeting": {
       "min": 2,
       "max": 25,
       "mean": 10,
-      "stdev": 5
+      "stdev": 4
     },
     "pt_ct_atp_meeting_btc_new": {
       "min": 15,
       "max": 75,
       "mean": 20,
-      "stdev": 10
+      "stdev": 8
     },
     "pt_ct_atp_meeting_btc_fu": {
       "min": 5,
       "max": 60,
       "mean": 15,
-      "stdev": 10
+      "stdev": 5
     },
     "pt_ct_atp_meeting_uc": {
       "min": 5,
       "max": 60,
       "mean": 15,
-      "stdev": 10
+      "stdev": 5
     }
-  }
+  },
+  "targetTime": 180,
+  "hurryThreshold": 30,
+  "hurryFactor": 0.5
 }
         </textarea>
         <button class="btn btn-warning" id="btnLoadJSON">Import JSON</button>
@@ -280,6 +289,8 @@ document.getElementById('btnRunSingle').addEventListener('click', function() {
   sim.run(params, scheduler);
   visualize(sim);
 });
+
+document.getElementById('btnLoadJSON').click();
 
 var simulationWorker = new Worker('js/worker.js');
 

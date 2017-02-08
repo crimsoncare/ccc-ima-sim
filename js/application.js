@@ -5,6 +5,10 @@ function Application() {
   this.txtNumClinicalTeams = document.getElementById('numClinicalTeams');
   this.txtNumPatients = document.getElementById('numPatients');
 
+  this.txtTargetTime = document.getElementById('targetTime');
+  this.txtHurryThreshold = document.getElementById('hurryThreshold');
+  this.txtHurryFactor = document.getElementById('hurryFactor');
+
   this.txtNumAttendings.onkeyup = this.showConfirmParams;
   this.txtNumClinicalTeams.onkeyup = this.showConfirmParams;
   this.txtNumPatients.onkeyup = this.showConfirmParams;
@@ -33,6 +37,10 @@ Application.prototype.createSession = function() {
     numClinicalTeams: parseInt(this.txtNumClinicalTeams.value),
     numPatients: parseInt(this.txtNumPatients.value),
 
+    targetTime: parseFloat(this.txtTargetTime),
+    hurryThreshold: parseFloat(this.txtHurryThreshold),
+    hurryFactor: parseFloat(this.txtHurryFactor),
+
     actors: {
       attendings: [ ],
       clinicalTeams: [ ],
@@ -42,9 +50,9 @@ Application.prototype.createSession = function() {
     distributions: {
       pt_checkin:                { name: 'Patient check in',                          min:   2, max: 10, mean:  5, stdev:  2 },
       pt_arrival_delay:          { name: 'Patient arrival (relative to appointment)', min: -60, max: 60, mean: -6, stdev: 16 },
-      pt_ct_meeting_btc_new:     { name: 'ClinicalTeam-Attending meeting (BTC New)',  min:  15, max: 75, mean: 40, stdev: 20 },
-      pt_ct_meeting_btc_fu:      { name: 'ClinicalTeam-Attending meeting (BTC F/U)',  min:  15, max: 75, mean: 30, stdev: 15 },
-      pt_ct_meeting_uc:          { name: 'ClinicalTeam-Attending meeting (UC)',       min:  15, max: 75, mean: 30, stdev: 15 },
+      pt_ct_meeting_btc_new:     { name: 'Patient-ClinicalTeam meeting (BTC New)',  min:  15, max: 75, mean: 40, stdev: 20 },
+      pt_ct_meeting_btc_fu:      { name: 'Patient-ClinicalTeam meeting (BTC F/U)',  min:  15, max: 75, mean: 30, stdev: 15 },
+      pt_ct_meeting_uc:          { name: 'Patient-ClinicalTeam meeting (UC)',       min:  15, max: 75, mean: 30, stdev: 15 },
       ct_atp_meeting:            { name: 'ClinicalTeam-Attending meeting',            min:   1, max: 25, mean: 10, stdev:  5 },
       pt_ct_atp_meeting_btc_new: { name: 'Patient-Attending meeting (BTC New)',       min:  15, max: 75, mean: 20, stdev: 15 },
       pt_ct_atp_meeting_btc_fu:  { name: 'Patient-Attending meeting (BTC F/U)',       min:   5, max: 60, mean: 15, stdev: 15 },
@@ -156,6 +164,10 @@ Application.prototype.getParams = function() {
 
   var params = this.params;
 
+  params.targetTime = parseFloat(this.txtTargetTime.value);
+  params.hurryThreshold = parseFloat(this.txtHurryThreshold.value);
+  params.hurryFactor = parseFloat(this.txtHurryFactor.value);
+
   var patientFields = ['caseType', 'preferredAttending', 'preferredClinicalTeam'];
   var numericFields = ['appointmentTime', 'maxWaitTimeAttending', 'maxWaitTimeClinicalTeam'];
   var patientRows = document.querySelectorAll("[data-type='Patient']");
@@ -186,6 +198,10 @@ Application.prototype.setParams = function(newParams) {
   this.txtNumAttendings.value = newParams.numAttendings;
   this.txtNumClinicalTeams.value = newParams.numClinicalTeams;
   this.txtNumPatients.value = newParams.numPatients;
+
+  this.txtTargetTime.value = newParams.targetTime;
+  this.txtHurryThreshold.value = newParams.hurryThreshold;
+  this.txtHurryFactor.value = newParams.hurryFactor;
 
   this.createSession();
 
