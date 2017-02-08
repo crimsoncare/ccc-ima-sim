@@ -27,12 +27,48 @@ function runSingle(params) {
   return sim;
 }
 
+function cloneSimulation(old) {
+  // return JSON.parse(JSON.stringify(sim));
+  var sim = {
+    actors: [ ]
+  };
+  old.actors.forEach(function(actor) {
+    var newActor = {
+      id: actor.id,
+      type: actor.type,
+      timeline: JSON.parse(JSON.stringify(actor.timeline)),
+    };
+    if (actor.hasOwnProperty('patientsSeen')) {
+      newActor.patientsSeen = [ ];
+      actor.patientsSeen.forEach(function(patient) {
+        var patient = {
+          id: patient.id,
+          clinicalTeam: {id: patient.clinicalTeam.id},
+          attending: {id: patient.attending.id},
+        };
+        newActor.patientsSeen.push(patient);
+      });
+    }
+    if (actor.hasOwnProperty('clinicalTeam')) {
+      newActor.clinicalTeam = {id: actor.clinicalTeam.id};
+    }
+    if (actor.hasOwnProperty('attending')) {
+      newActor.attending = {id: actor.attending.id};
+    }
+    sim.actors.push(newActor);
+  });
+  return sim;
+}
+
 function runMonteCarlo(params, numSamps) {
 
   var results = { actors: [ ], times: [ ] };
 
   var sim = new Simulation();
   var scheduler = new Scheduler();
+
+  var worstCaseTime = 0;
+  var worstCase = { };
 
   for (var i = 0; i < numSamps; i++) {
 
@@ -63,6 +99,11 @@ function runMonteCarlo(params, numSamps) {
 
     // clinic end time and other global simulation info
     results.times.push(sim.time);
+
+    if (sim.time > worstCaseTime) {
+      worstCaseTime = sim.time;
+      worstCase = cloneSimulation(sim);
+    }
 
     // append to results.actor
     for (var j = 0; j < sim.actors.length; j++) {
@@ -157,6 +198,7 @@ function runMonteCarlo(params, numSamps) {
 
   results.times = getStats(results.times);
   results.params = params;
+  results.worstCase = worstCase;
 
   return results;
 }

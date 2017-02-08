@@ -9,10 +9,6 @@ Scheduler.prototype.init = function(sim) {
   this.sim = sim;
   var params = this.sim.params;
 
-  this.sim.params.targetTime = 180;
-  this.sim.params.hurryThreshold = 30;
-  this.sim.params.hurryFactor = 0.5;
-
   var actors = this.sim.params.actors;
 
   sim.actors = [ ];

@@ -51,7 +51,7 @@
   "numPatients": 8,
   "targetTime": 180,
   "hurryThreshold": 30,
-  "hurryFactor": 0.5,
+  "hurryFactor": 0.75,
   "actors": {
     "attendings": [
       {
@@ -211,10 +211,7 @@
       "mean": 15,
       "stdev": 5
     }
-  },
-  "targetTime": 180,
-  "hurryThreshold": 30,
-  "hurryFactor": 0.5
+  }
 }
         </textarea>
         <button class="btn btn-warning" id="btnLoadJSON">Import JSON</button>
@@ -370,6 +367,7 @@ var getHistLayout = function(stats, title, color) {
 function showMonteCarloResults(results) {
 
   var div = document.getElementById('mc');
+  div.style.display = 'block';
 
   var colors = {
     'Patient': '51,102,153',
@@ -673,9 +671,12 @@ function showMonteCarloResults(results) {
   createPatientPlots();
   createClinicalTeamPlots();
   createAttendingPlots();
+  visualize(results.worstCase, '<p>Showing worst case scenario encountered during Monte Carlo simulation</p>');
 };
 
-function visualize(sim) {
+function visualize(sim, message) {
+
+  message = message || '<p><strong>Hint:</strong> hover over the timeline labels to highlight relationships</p>';
 
   var timelines = document.getElementById('timelines');
   timelines.style.display = 'block';
@@ -794,7 +795,7 @@ function visualize(sim) {
   };
 
   legend.innerHTML = '';
-  timelines.innerHTML = '<p><strong>Hint:</strong> hover over the timeline labels to highlight relationships</p>';
+  timelines.innerHTML = message;
 
   // ticks
   var timeline = createTimeline({

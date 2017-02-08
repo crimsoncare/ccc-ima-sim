@@ -203,6 +203,8 @@ Application.prototype.setParams = function(newParams) {
   this.txtHurryThreshold.value = newParams.hurryThreshold;
   this.txtHurryFactor.value = newParams.hurryFactor;
 
+  console.log(newParams, this.txtHurryFactor);
+
   this.createSession();
 
   this.params = newParams;

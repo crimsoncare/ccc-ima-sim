@@ -4,7 +4,7 @@
   "numPatients": 8,
   "targetTime": 180,
   "hurryThreshold": 30,
-  "hurryFactor": 0.5,
+  "hurryFactor": 0.75,
   "actors": {
     "attendings": [
       {
