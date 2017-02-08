@@ -1,7 +1,7 @@
 html { box-sizing: border-box; font-size: 14px; }
 *, *:before, *:after { box-sizing: inherit; font-size:inherit; }
 body { font-family: "Helvetica Neue", "Arial", sans-serif; }
-html, body {padding: 0; margin: 0; }
+html, body {padding: 0; margin: 0; background: #333; }
 p { margin: 0 0 1em; }
 #menu { background: #333; padding: 0.5em; }
 #mc { display: none; }
