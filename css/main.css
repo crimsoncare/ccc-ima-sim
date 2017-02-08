@@ -1,10 +1,15 @@
 html { box-sizing: border-box; font-size: 14px; }
 *, *:before, *:after { box-sizing: inherit; font-size:inherit; }
 body { font-family: "Helvetica Neue", "Arial", sans-serif; }
+html, body {padding: 0; margin: 0; }
 
-.timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px;}
+#menu { background: #333; padding: 0.5em; }
+
+#timelines { background: #222; padding: 1.5em; margin: 0 0 1em; color: #888; }
+.timeline { line-height: 1.6em; height: 1.6em; margin-bottom: 1px; transition: all .2s ease;}
+.timeline.hidden { opacity: 0.25; }
 .timeline.last { margin-bottom: 2em; }
-.timeline .label { display: inline-block; width: 8em; overflow: hidden; }
+.timeline .label { display: inline-block; width: 8em; overflow: hidden; cursor: pointer; }
 .timeline .events { display: inline-block; position: relative; width: 900px; height: 1.6em;}
 .timeline .events div { position: absolute; top: 0; text-align: center; opacity: 0.9;
   border: 1px solid #222; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25); border-top: 0; border-bottom: 0; border-right: 0; }
@@ -51,7 +56,7 @@ body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 .params table select { -webkit-appearance: button; -webkit-border-radius: 0; -webkit-user-select: none; font-size: inherit; }
 
 /* buttons */
-.btn { display: inline-block; padding: 0.5em 1em; border: 0; border-radius: 0.2em; color: #fff !important; text-decoration: none !important; text-shadow: 0 0 1px rgba(0,0,0,0.3); cursor: pointer; box-shadow: 0 0.1em 1em -0.5em rgba(0,0,0,0.5); margin: 0.25em 0.5em 0.25em 0; transition: all .2s ease-in-out; }
+.btn { display: inline-block; padding: 0.5em 1em; border: 0; border-radius: 0.2em; color: #fff !important; text-decoration: none !important; text-shadow: 0 0 1px rgba(0,0,0,0.3); cursor: pointer; box-shadow: 0 0.1em 1em -0.5em rgba(0,0,0,0.5); margin: 0 0.5em 0 0; transition: all .2s ease-in-out; }
 .btn:hover { opacity: 1;  transform: scale(1.05); }
 .btn i.fa { margin-right: 0.25em; }
 .btn-success { background: #4cae4c; }
@@ -59,5 +64,3 @@ body { font-family: "Helvetica Neue", "Arial", sans-serif; }
 .btn-warning { background: #eea236; }
 
 textarea.json { width: 100%; height: 100%; font-family: monospace; margin-bottom: 1em; border: 1px solid #ccc; overflow: auto;}
-
-#timelines { background: #222; padding: 1.5em; margin: 0.5em 0; color: #888; }

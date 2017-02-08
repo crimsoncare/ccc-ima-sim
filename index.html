@@ -225,10 +225,12 @@
   </div>
 </div>
 
+<div id="menu">
 <button class="btn btn-primary" id="btnShowParams" data-modal="mdlParams">Parameters</button>
 <button class="btn btn-primary" id="btnShowJSON" data-modal="mdlJSON">JSON import/export</button>
 <button class="btn btn-primary" id="btnRunSingle">Run Single</button>
 <button class="btn btn-primary" id="btnRunMonteCarlo">Run Monte Carlo</button>
+</div>
 
 <div id="legend"></div>
 <div id="timelines"></div>
@@ -438,7 +440,7 @@ function showMonteCarloResults(results) {
     }
   };
 
-  var timeHist = hist(results.times.samples, 120, 240, 61);
+  var timeHist = hist(results.times.samples, results.params.targetTime - 60, results.params.targetTime + 60, 61);
   var timeData = [{
     x: timeHist.bins,
     y: timeHist.counts,
@@ -450,7 +452,7 @@ function showMonteCarloResults(results) {
     mode: 'none',
   }];
   var layout = getHistLayout(results.times, '', colors['Patient']);
-  layout.xaxis = getTimeTicks(120, 240);
+  layout.xaxis = getTimeTicks(results.params.targetTime - 60, results.params.targetTime + 60);
   layout.xaxis.title = 'Last patient checked out';
   Plotly.newPlot('pltTimeHist', timeData,layout);
 
@@ -684,16 +686,33 @@ function visualize(sim) {
     if (className.includes('tick')) {
       label = Simulation.formatTime(start);
     } else {
-      event.onmouseover = function() {
-        info.innerHTML = className;
-      };
+      event.title = className;
+      // event.onmouseover = function() { info.innerHTML = className; };
     }
     event.appendChild(document.createTextNode(label)); // round to nearest integer
     event.className = className;
-    event.title = className;
     event.style.left = start * scale + 'px';
     event.style.width = duration * scale + 'px';
     return event;
+  };
+
+  var highlightTimelines = function(highlightFilter) {
+    document.querySelectorAll('.timeline').forEach(function(timeline) {
+      if (highlightFilter(timeline)) {
+        if (timeline.classList.contains('hidden'))
+          timeline.classList.remove('hidden');
+      } else {
+        if (!timeline.classList.contains('hidden'))
+          timeline.classList.add('hidden');
+      }
+    });
+  };
+
+  var resetTimelines = function() {
+    document.querySelectorAll('.timeline').forEach(function(timeline) {
+      if (timeline.classList.contains('hidden'))
+        timeline.classList.remove('hidden');
+    });
   };
 
   var createTimeline = function(actor) {
@@ -704,6 +723,53 @@ function visualize(sim) {
     label.appendChild(document.createTextNode(actor.id));
     label.className = 'label ' + actor.type;
     timeline.appendChild(label);
+    timeline.setAttribute('data-id', actor.id);
+
+    if (actor.type == 'Patient') {
+      label.onmouseover = function(e) {
+        highlightTimelines(function(timeline) {
+          var dataId = timeline.getAttribute('data-id');
+          return (dataId == actor.id || dataId == actor.clinicalTeam.id || dataId == actor.attending.id);;
+        });
+      };
+      label.onmouseout = resetTimelines;
+    }
+
+    if (actor.type == 'ClinicalTeam') {
+      var patientsSeenIds = [ ];
+      var attendingIds = [ ];
+      actor.patientsSeen.forEach(function(patient) {
+        patientsSeenIds.push(patient.id);
+        attendingIds.push(patient.attending.id);
+      });
+      timeline.onmouseover = function(e) {
+        highlightTimelines(function(timeline) {
+          var id = timeline.getAttribute('data-id');
+          return (id == actor.id ||
+            patientsSeenIds.indexOf(id) !== -1 ||
+            attendingIds.indexOf(id) !== -1);
+        });
+      };
+      timeline.onmouseout = resetTimelines;
+    }
+
+    if (actor.type == 'Attending') {
+      var patientsSeenIds = [ ];
+      var clinicalTeamIds = [ ];
+      actor.patientsSeen.forEach(function(patient) {
+        patientsSeenIds.push(patient.id);
+        clinicalTeamIds.push(patient.clinicalTeam.id);
+      });
+      timeline.onmouseover = function(e) {
+        highlightTimelines(function(timeline) {
+          var dataId = timeline.getAttribute('data-id');
+          return (dataId == actor.id ||
+            patientsSeenIds.indexOf(timeline.getAttribute('data-id')) !== -1 ||
+            clinicalTeamIds.indexOf(timeline.getAttribute('data-id')) !== -1);
+        });
+      };
+      timeline.onmouseout = resetTimelines;
+    }
 
     var events = document.createElement('div');
     events.className = 'events ' + actor.type;
