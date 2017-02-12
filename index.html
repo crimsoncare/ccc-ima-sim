@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dth">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <meta charset="utf-8">
 <head>
@@ -224,11 +224,28 @@
   </div>
 </div>
 
+<div id="mdlDelta" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span class="close">&times;</span>
+      <h2>Deltas</h2>
+    </div>
+    <div class="modal-body">
+      <p>Press ESC, the close button, or click outside to close this dialog.</p>
+      <div class="params">
+      <div id="deltas"></div>
+      </div>
+      <style>#deltas td {padding: 5px; }#deltas tr:first-child {font-weight: bold;}#deltas td { text-align: right; } </style>
+    </div>
+  </div>
+</div>
+
 <div id="menu">
 <button class="btn btn-primary" id="btnShowParams" data-modal="mdlParams">Parameters</button>
 <button class="btn btn-primary" id="btnShowJSON" data-modal="mdlJSON">JSON import/export</button>
 <button class="btn btn-primary" id="btnRunSingle">Run Simulation</button>
 <button class="btn btn-primary" id="btnRunMonteCarlo">Run Monte Carlo</button>
+<button class="btn btn-primary" id="btnShowDeltas" data-modal="mdlDelta">Show Deltas</button>
 </div>
 
 <div id="legend"></div>
@@ -305,6 +322,10 @@ simulationWorker.onmessage = function(message) {
   if (message.data.action == 'runMonteCarlo') {
     var results = message.data.results;
     showMonteCarloResults(results);
+    if (app.prevResult !== null) {
+      showDeltas(results, app.prevResult);
+    }
+    app.prevResult = results;
     document.getElementById('btnRunMonteCarlo').innerHTML = 'Run Monte Carlo';
   }
 };
@@ -360,6 +381,53 @@ var getHistLayout = function(stats, title, color) {
       }
     ]
   };
+};
+
+function showDeltas(current, prev) {
+  var div = document.getElementById('deltas');
+  var trends = {
+    times: { current: 0, prev: 0 },
+    totalTimeInClinic: { current: 0, prev: 0 },
+    // seenByPreferredAttending: { current: 0, prev: 0 },
+    // seenByPreferredClinicalTeam: { current: 0, prev: 0 },
+    waitingForClinicalTeam: { current: 0, prev: 0 },
+    clinicalTeamsPatientsSeen: { current: 0, prev: 0 },
+    clinicalTeamsWaitingForPatient: { current: 0, prev: 0 },
+    attendingsPatientsSeen: { current: 0, prev: 0 },
+    attendingsWaitingForPatient: { current: 0, prev: 0 }
+  };
+  var groups = {
+    'current': current,
+    'prev': prev
+  };
+  Object.keys(groups).forEach(function(key) {
+    trends.times[key] += groups[key].times.mean;
+    groups[key].patients.forEach(function(patient) {
+      trends.totalTimeInClinic[key] += patient.totalTimeInClinic.mean / groups[key].patients.length;
+      // trends.seenByPreferredAttending[key] += patient.seenByPreferredAttending.mean / groups[key].patients.length;
+      // trends.seenByPreferredClinicalTeam[key] += patient.seenByPreferredClinicalTeam.mean / groups[key].patients.length;
+      trends.waitingForClinicalTeam[key] += patient.waitingForClinicalTeam.mean / groups[key].patients.length;
+    });
+    groups[key].clinicalTeams.forEach(function(clinicalTeam) {
+      trends.clinicalTeamsPatientsSeen[key] += clinicalTeam.patientsSeen.mean / groups[key].clinicalTeams.length;
+      trends.clinicalTeamsWaitingForPatient[key] += clinicalTeam.timeInState['CLINICAL_TEAM_WAITING_FOR_PATIENT'].mean / groups[key].clinicalTeams.length;
+    });
+    groups[key].attendings.forEach(function(attending) {
+      trends.attendingsPatientsSeen[key] += attending.patientsSeen.mean / groups[key].attendings.length;
+      trends.attendingsWaitingForPatient[key] += attending.timeInState['ATTENDING_WAITING_FOR_CLINICAL_TEAM'].mean / groups[key].attendings.length;
+    });
+  });
+  var deltahtml = ['<table><tr><td>Metric</td><td>Prev</td><td>Current</td><td>Delta</td><td>Delta%</td></tr>'];
+  Object.keys(trends).forEach(function(key) {
+    var vprev = trends[key].prev;
+    var vcurrent = trends[key].current;
+    var delta = vcurrent - vprev;
+    var percent = delta / vprev * 100;
+    deltahtml.push('<tr><td>' + key + '</td><td>' + vprev.toFixed(2) + '</td><td>' + vcurrent.toFixed(2) + '</td><td>' + delta.toFixed(2) + '</td><td>' + percent.toFixed(1) + '%</td></tr>');
+  });
+  deltahtml.push('</table>');
+  document.getElementById('deltas').innerHTML = deltahtml.join('');
+
 };
 
 function showMonteCarloResults(results) {

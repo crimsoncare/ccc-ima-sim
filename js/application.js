@@ -13,7 +13,7 @@ function Application() {
   this.txtNumClinicalTeams.onkeyup = this.showConfirmParams;
   this.txtNumPatients.onkeyup = this.showConfirmParams;
 
-  this.monteCarloResults = [ ];
+  this.prevResult = null;
 
 }
 
