@@ -320,6 +320,150 @@
     },
     "ct_atp_meeting": {
       "min": 2,
+{
+  "numAttendings": 2,
+  "numClinicalTeams": 4,
+  "numPatients": 8,
+  "targetTime": 180,
+  "hurryThreshold": 30,
+  "hurryFactor": 0.75,
+  "actors": {
+    "attendings": [
+      {
+        "id": "Attending-1"
+      },
+      {
+        "id": "Attending-2"
+      }
+    ],
+    "clinicalTeams": [
+      {
+        "id": "ClinicalTeam-1"
+      },
+      {
+        "id": "ClinicalTeam-2"
+      },
+      {
+        "id": "ClinicalTeam-3"
+      },
+      {
+        "id": "ClinicalTeam-4"
+      }
+    ],
+    "patients": [
+      {
+        "id": "Patient-1",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "uc",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-2",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "uc",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-3",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "uc",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-4",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "btc_new",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-5",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "btc_new",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-6",
+        "preferredAttending": "None",
+        "preferredClinicalTeam": "None",
+        "caseType": "btc_new",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 30,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-7",
+        "preferredAttending": "Attending-1",
+        "preferredClinicalTeam": "ClinicalTeam-1",
+        "caseType": "btc_fu",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 60,
+        "appointmentTime": 0
+      },
+      {
+        "id": "Patient-8",
+        "preferredAttending": "Attending-2",
+        "preferredClinicalTeam": "ClinicalTeam-2",
+        "caseType": "btc_fu",
+        "maxWaitTimeAttending": 30,
+        "maxWaitTimeClinicalTeam": 60,
+        "appointmentTime": 0
+      }
+    ]
+  },
+  "distributions": {
+    "pt_checkin": {
+      "min": 2,
+      "max": 10,
+      "mean": 5,
+      "stdev": 2
+    },
+    "pt_checkout": {
+      "min": 1,
+      "max": 20,
+      "mean": 5,
+      "stdev": 3
+    },
+    "pt_arrival_delay": {
+      "min": -60,
+      "max": 60,
+      "mean": -6,
+      "stdev": 14
+    },
+    "pt_ct_meeting_btc_new": {
+      "min": 15,
+      "max": 75,
+      "mean": 45,
+      "stdev": 10
+    },
+    "pt_ct_meeting_btc_fu": {
+      "min": 15,
+      "max": 75,
+      "mean": 30,
+      "stdev": 5
+    },
+    "pt_ct_meeting_uc": {
+      "min": 15,
+      "max": 75,
+      "mean": 30,
+      "stdev": 8
+    },
+    "ct_atp_meeting": {
+      "min": 2,
       "max": 25,
       "mean": 10,
       "stdev": 4
