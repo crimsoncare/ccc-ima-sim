@@ -505,7 +505,7 @@ function showMonteCarloResults(results) {
     }
   };
 
-  var timeHist = hist(results.times.samples, results.params.targetTime - 60, results.params.targetTime + 60, 61);
+  var timeHist = hist(results.times.samples, results.params.targetTime - 120, results.params.targetTime + 90, 211);
   var timeData = [{
     x: timeHist.bins,
     y: timeHist.counts,
