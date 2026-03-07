@@ -9,5 +9,7 @@ Contact:
 Presentations:
  - [Slides from SSRFC 2017](/doc/20170204-SSFRC-presentation.pdf) [pdf]
 
+Last updated: 2026
+
 ### Screenshots
 ![Timeline view](/doc/screenshot.png?raw=true)
