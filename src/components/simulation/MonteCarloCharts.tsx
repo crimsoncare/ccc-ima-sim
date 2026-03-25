@@ -289,7 +289,17 @@ function PatientsSeenChart({
     return row;
   });
 
-  const minOpacity = 0.2;
+  // Distinct color palette instead of opacity stacking
+  const [r, g, b] = color.split(',').map(Number);
+  const palette = countValues.map((_, idx) => {
+    const t = countValues.length > 1 ? idx / (countValues.length - 1) : 0.5;
+    // Interpolate from light to dark
+    const lr = Math.round(r + (255 - r) * (1 - t) * 0.6);
+    const lg = Math.round(g + (255 - g) * (1 - t) * 0.6);
+    const lb = Math.round(b + (255 - b) * (1 - t) * 0.6);
+    return `rgb(${lr},${lg},${lb})`;
+  });
+
   return (
     <div>
       <h3 className="text-sm font-semibold mb-1 text-gray-700">{title}</h3>
@@ -299,20 +309,16 @@ function PatientsSeenChart({
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 11 }} />
           <Tooltip formatter={(v) => `${(v as number).toFixed(1)}%`} />
-          {countValues.map((count, idx) => {
-            const opacity = minOpacity + (1 - minOpacity) * ((count - globalMin) / Math.max(globalMax - globalMin, 1));
-            const [r, g, b] = color.split(',').map(Number);
-            return (
-              <Bar
-                key={count}
-                dataKey={`c${count}`}
-                name={`${count} patients`}
-                stackId="a"
-                fill={`rgba(${r},${g},${b},${opacity})`}
-                isAnimationActive={false}
-              />
-            );
-          })}
+          {countValues.map((count, idx) => (
+            <Bar
+              key={count}
+              dataKey={`c${count}`}
+              name={`${count} patients`}
+              stackId="a"
+              fill={palette[idx]}
+              isAnimationActive={false}
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
     </div>

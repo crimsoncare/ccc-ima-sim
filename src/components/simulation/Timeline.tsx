@@ -168,6 +168,16 @@ export function Timeline({ actors, message }: TimelineProps) {
         onMouseLeave={handleMouseLeave}
         isLast={false}
       />
+      {/* Color legend */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 pt-3 border-t border-white/10 text-[11px]">
+        <LegendItem color="rgb(51,153,102)" label="CT Meeting" />
+        <LegendItem color="rgb(51,125,135)" label="CT-Attending Meeting" />
+        <LegendItem color="rgb(51,102,160)" label="Attending Meeting" />
+        <LegendItem color="rgba(127,127,127,0.5)" label="Check-in / Check-out" />
+        <LegendItem color="rgba(224,192,0,0.6)" label="Wait (preferred)" border />
+        <LegendItem color="rgba(255,96,0,0.6)" label="Wait (attending)" border />
+        <LegendItem color="rgba(255,0,0,0.6)" label="Wait (any available)" border />
+      </div>
     </div>
   );
 }
@@ -179,6 +189,21 @@ interface TimeRowProps {
   onMouseEnter: (id: string) => void;
   onMouseLeave: () => void;
   isLast: boolean;
+}
+
+function LegendItem({ color, label, border }: { color: string; label: string; border?: boolean }) {
+  return (
+    <span className="flex items-center gap-1.5 text-gray-400">
+      <span
+        className="w-3 h-3 rounded-sm inline-block shrink-0"
+        style={border
+          ? { background: 'transparent', boxShadow: `inset 0 0 0 2px ${color}` }
+          : { background: color }
+        }
+      />
+      {label}
+    </span>
+  );
 }
 
 function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeave, isLast }: TimeRowProps) {
