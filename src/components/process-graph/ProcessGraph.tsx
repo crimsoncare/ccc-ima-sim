@@ -289,6 +289,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         onEdgeClick={onEdgeClick}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        nodesDraggable={false}
         fitView
         fitViewOptions={{ padding: 0.15, maxZoom: 1.0 }}
         minZoom={0.1}

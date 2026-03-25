@@ -3,6 +3,7 @@ import { useSimulationStore } from '@/store/simulation-store';
 import { useMiningStore } from '@/store/mining-store';
 import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
 import { GraphControls } from '@/components/process-graph/GraphControls';
+import { WorkflowChevron } from '@/components/workflow/WorkflowChevron';
 import { VariantList } from '@/components/variant-panel/VariantList';
 import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
 import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
@@ -76,12 +77,12 @@ export function IndexPage() {
   }, [variants]);
 
   const sections = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'process', label: 'Process' },
+    { id: 'overview', label: 'The Question' },
+    { id: 'process', label: 'Discovery' },
     { id: 'patterns', label: 'Patterns' },
     { id: 'bottleneck', label: 'Bottleneck' },
     { id: 'evidence', label: 'Evidence' },
-    { id: 'next', label: 'Next Steps' },
+    { id: 'next', label: 'The Answer' },
   ];
 
   // Track active section via IntersectionObserver
@@ -132,19 +133,18 @@ export function IndexPage() {
       )}
       <div className="max-w-7xl mx-auto px-6 py-8">
 
-        {/* ── HERO ─────────────────────────────────────────── */}
+        {/* ── THE QUESTION ─────────────────────────────────── */}
         <div id="overview" className="mb-12 scroll-mt-12">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-blue-600 to-blue-400" />
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Clinic Performance Analysis
-                </h1>
-              </div>
-              <p className="text-gray-400 mt-1 text-sm ml-[19px]">
-                Crimson Care Collaborative — Internal Medicine Associates, Massachusetts General Hospital
+              <p className="text-xs font-semibold text-[#0091ea] uppercase tracking-widest mb-2">
+                Crimson Care Collaborative — Internal Medicine Associates, MGH
               </p>
+              <h1 className="text-3xl font-bold text-gray-900 leading-snug">
+                Should we increase the number of<br />
+                clinical teams to better achieve<br />
+                our design objectives?
+              </h1>
             </div>
             {isRunning && (
               <div className="flex items-center gap-2 text-blue-600 text-sm">
@@ -152,19 +152,64 @@ export function IndexPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Analyzing...
+                Running simulation...
               </div>
             )}
           </div>
 
+          {/* Workflow chevron — "A Typical Visit" from SSFRC paper */}
+          <div className="mt-6 bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">A Typical Visit</p>
+            <WorkflowChevron />
+            <div className="mt-4 text-sm text-gray-500 leading-relaxed">
+              Each clinic session runs Tuesday 5-9 PM with {params.numClinicalTeams ?? 4} clinical teams and {params.numAttendings ?? 2} attendings
+              seeing up to {params.numPatients ?? 8} patients. The bottleneck question:
+              every patient must pass through the attending handoff, but attendings are shared across all teams.
+            </div>
+          </div>
+
+          {/* The Debate — Alice vs Bob from the paper */}
           {lastSimulation && (
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-6 p-6">
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-bold">+</div>
+                  <h3 className="font-semibold text-gray-800">Case for more teams</h3>
+                </div>
+                <ul className="text-sm text-gray-500 space-y-1 list-disc list-inside">
+                  <li>More patients seen per session</li>
+                  <li>Patients wait less for their clinical team</li>
+                  <li>Clinic may end earlier</li>
+                  <li>More volunteering opportunities</li>
+                </ul>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center text-red-700 text-xs font-bold">&minus;</div>
+                  <h3 className="font-semibold text-gray-800">Case against more teams</h3>
+                </div>
+                <ul className="text-sm text-gray-500 space-y-1 list-disc list-inside">
+                  <li>Bottleneck may lie elsewhere (attendings)</li>
+                  <li>Patients will wait more for attending</li>
+                  <li>May not reduce total clinic duration</li>
+                  <li>Fewer patients per team (less learning)</li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* KPI summary */}
+          {lastSimulation && (
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-4 p-5">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Simulation ran {caseCount.toLocaleString()} encounters to find out
+              </p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
                 <Metric value={caseCount.toLocaleString()} label="Patient encounters" />
                 <Metric value={String(variantCount)} label="Unique pathways" />
                 <Metric value={String(activityCount)} label="Activities" />
                 <Metric value={`${happyPathPct}%`} label="Happy path" />
-                <Metric value={`${params.numAttendings ?? 2} / ${params.numClinicalTeams ?? 4}`} label="Attendings / Teams" />
+                <Metric value={`${params.numAttendings ?? 2} / ${params.numClinicalTeams ?? 4}`} label="Attend / Teams" />
                 {bottleneck && <Metric value={`+${bottleneck.time.toFixed(0)}m`} label="Bottleneck delay" accent />}
               </div>
             </div>
@@ -249,11 +294,13 @@ export function IndexPage() {
           </NarrativeSection>
         )}
 
-        {/* ── 5. THE OPPORTUNITY ───────────────────────────── */}
+        {/* ── 5. THE ANSWER ────────────────────────────────── */}
         <NarrativeSection
           id="next"
-          question="What should we do next?"
-          answer="Process mining turns operational data into actionable insights. Here's what we recommend investigating further."
+          question="So, should we add more clinical teams?"
+          answer={bottleneck
+            ? `The simulation reveals that the bottleneck is at the attending handoff (+${bottleneck.time.toFixed(0)} min delay), not at the clinical team level. Adding more clinical teams would push more patients into the attending queue faster — potentially increasing wait times, not reducing them. The evidence points to three alternative strategies:`
+            : 'The simulation reveals the bottleneck location and suggests targeted interventions:'}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
