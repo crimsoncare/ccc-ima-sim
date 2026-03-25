@@ -27,7 +27,7 @@ function getNodeColor(label: string): string {
   return '#e65100';
 }
 
-export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
+export const ActivityNode = memo(function ActivityNode({ data, selected }: NodeProps) {
   const d = data as unknown as ActivityNodeData;
   const isStart = d.label === PROCESS_START;
   const isEnd = d.label === PROCESS_END;
@@ -62,9 +62,9 @@ export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
   return (
     <div className="flex items-center gap-2.5 cursor-pointer group" title={`${d.label}\n${d.frequency} cases`}>
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-none !w-0 !h-0" />
-      {/* Filled circle */}
+      {/* Filled circle with selection ring */}
       <div
-        className="rounded-full shrink-0 shadow-sm transition-transform group-hover:scale-110"
+        className={`rounded-full shrink-0 shadow-sm transition-all group-hover:scale-110 ${selected ? 'ring-3 ring-blue-400 ring-offset-2' : ''}`}
         style={{ width: 22, height: 22, backgroundColor: color }}
       />
       {/* Label + frequency to the right */}

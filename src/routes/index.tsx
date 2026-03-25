@@ -85,24 +85,23 @@ export function IndexPage() {
     { id: 'next', label: 'The Answer' },
   ];
 
-  // Track active section via IntersectionObserver
+  // Track active section via scroll position (works inside scrolling <main>)
   const [activeSection, setActiveSection] = useState('overview');
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        }
-      },
-      { rootMargin: '-40% 0px -55% 0px' },
-    );
-    for (const s of sections) {
-      const el = document.getElementById(s.id);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
+    const main = document.querySelector('main');
+    if (!main) return;
+    const handleScroll = () => {
+      const scrollY = main.scrollTop + main.clientHeight * 0.35;
+      let current = 'overview';
+      for (const s of sections) {
+        const el = document.getElementById(s.id);
+        if (el && el.offsetTop <= scrollY) current = s.id;
+      }
+      setActiveSection(current);
+    };
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // initial
+    return () => main.removeEventListener('scroll', handleScroll);
   }, [lastSimulation]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

@@ -82,9 +82,9 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         miningStore.setVariants(variants);
         miningStore.setHappyPath(happyPath);
 
-        // Show top ~40% of activities (max 15) for spacious Celonis-like graph
+        // Show top activities (max 12) for readable default zoom like Celonis
         const sorted = [...dfg.nodes].sort((a, b) => b.frequency - a.frequency);
-        const topCount = Math.min(15, Math.max(8, Math.ceil(sorted.length * 0.4)));
+        const topCount = Math.min(12, Math.max(8, Math.ceil(sorted.length * 0.35)));
         const topNodes = new Set(sorted.slice(0, topCount).map(n => n.activity));
         // Always include start/end
         for (const n of dfg.nodes) {
