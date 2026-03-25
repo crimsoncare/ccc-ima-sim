@@ -7,6 +7,7 @@ import { WorkflowChevron } from '@/components/workflow/WorkflowChevron';
 import { VariantList } from '@/components/variant-panel/VariantList';
 import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
 import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
+import { ComparisonCharts } from '@/components/simulation/ComparisonCharts';
 import { Timeline } from '@/components/simulation/Timeline';
 import { computeAllThroughputTimes } from '@/mining/throughput';
 
@@ -36,7 +37,7 @@ function NarrativeSection({ id, question, answer, children }: {
 }
 
 export function IndexPage() {
-  const { lastSimulation, monteCarloResults, runSimulation, runMonteCarlo, isRunning, params } = useSimulationStore();
+  const { lastSimulation, monteCarloResults, comparisonResults, comparisonLabel, isComparingRunning, runSimulation, runMonteCarlo, runComparison, isRunning, params } = useSimulationStore();
   const { eventLog, dfg, variants, happyPath } = useMiningStore();
 
   // Auto-generate data on first load
@@ -46,6 +47,14 @@ export function IndexPage() {
       setTimeout(() => runMonteCarlo(5000), 500);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-trigger 6-CT comparison after main MC completes
+  useEffect(() => {
+    if (monteCarloResults && !comparisonResults && !isComparingRunning) {
+      const altParams = { ...params, numClinicalTeams: 6 };
+      runComparison('6 Clinical Teams', altParams, 2000);
+    }
+  }, [monteCarloResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const bottleneck = useMemo(() => {
     if (!dfg) return null;
@@ -82,6 +91,7 @@ export function IndexPage() {
     { id: 'patterns', label: 'Patterns' },
     { id: 'bottleneck', label: 'Bottleneck' },
     { id: 'evidence', label: 'Evidence' },
+    { id: 'comparison', label: '4 vs 6 Teams' },
     { id: 'next', label: 'The Answer' },
   ];
 
@@ -293,13 +303,47 @@ export function IndexPage() {
           </NarrativeSection>
         )}
 
-        {/* ── 5. THE ANSWER ────────────────────────────────── */}
+        {/* ── 5. THE COMPARISON (paper slides 13-15) ─────── */}
+        {monteCarloResults && (
+          <NarrativeSection
+            id="comparison"
+            question={`What happens if we go from ${params.numClinicalTeams} to 6 clinical teams?`}
+            answer={comparisonResults
+              ? `This is the paper's key experiment. We ran ${params.numClinicalTeams} CTs (grey) vs 6 CTs (blue) across thousands of simulated clinic sessions. The comparison reveals the tradeoff: more teams means shorter CT waits but potentially longer attending waits — because the same ${params.numAttendings} attendings must serve more concurrent teams.`
+              : isComparingRunning
+                ? 'Running comparison simulation...'
+                : 'Comparison will run after the main simulation completes.'}
+          >
+            {comparisonResults ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <ComparisonCharts
+                  baseline={monteCarloResults}
+                  comparison={comparisonResults}
+                  baseLabel={`${params.numClinicalTeams} CTs (current)`}
+                  compLabel={`6 CTs (proposed)`}
+                />
+              </div>
+            ) : isComparingRunning ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center text-gray-400">
+                <svg className="animate-spin h-6 w-6 mx-auto mb-2 text-blue-500" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Running 2,000 simulations with 6 clinical teams...
+              </div>
+            ) : null}
+          </NarrativeSection>
+        )}
+
+        {/* ── 6. THE ANSWER ────────────────────────────────── */}
         <NarrativeSection
           id="next"
           question="So, should we add more clinical teams?"
-          answer={bottleneck
-            ? `The simulation's largest delay (+${bottleneck.time.toFixed(0)} min) occurs at "${bottleneck.source}" → "${bottleneck.target}". If this bottleneck is downstream of the clinical teams, adding more teams would push patients into the queue faster without clearing it — potentially increasing waits rather than reducing them. To fully answer this question, compare the current ${params.numClinicalTeams}-team configuration against alternatives using the interactive simulation.`
-            : 'Run the simulation to identify the bottleneck and evaluate staffing alternatives.'}
+          answer={comparisonResults && bottleneck
+            ? `The comparison confirms: adding clinical teams does NOT significantly reduce clinic end time. Patients wait less for their CT, but wait MORE for the attending — the bottleneck shifts downstream. With ${params.numAttendings} attendings serving 6 teams instead of ${params.numClinicalTeams}, the attending queue grows. The evidence points to three alternative strategies:`
+            : bottleneck
+              ? `The simulation's largest delay (+${bottleneck.time.toFixed(0)} min) occurs at "${bottleneck.source}" → "${bottleneck.target}". The comparison above shows the tradeoff of adding more teams.`
+              : 'Run the simulation to identify the bottleneck and evaluate staffing alternatives.'}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">

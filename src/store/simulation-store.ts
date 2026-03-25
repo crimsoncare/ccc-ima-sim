@@ -24,11 +24,15 @@ interface SimulationStore {
   params: SimulationParams;
   lastSimulation: SimulationResult | null;
   monteCarloResults: MonteCarloResults | null;
+  comparisonResults: MonteCarloResults | null;
+  comparisonLabel: string;
   isRunning: boolean;
+  isComparingRunning: boolean;
   setParams: (params: SimulationParams) => void;
   runSimulation: (params?: SimulationParams) => void;
   runMultipleSimulations: (count: number, params?: SimulationParams) => void;
   runMonteCarlo: (numSamps?: number, params?: SimulationParams) => void;
+  runComparison: (label: string, params: SimulationParams, numSamps?: number) => void;
 }
 
 let worker: Worker | null = null;
@@ -47,7 +51,10 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
   params: exampleParams as SimulationParams,
   lastSimulation: null,
   monteCarloResults: null,
+  comparisonResults: null,
+  comparisonLabel: '',
   isRunning: false,
+  isComparingRunning: false,
 
   setParams: (params) => set({ params }),
 
@@ -231,5 +238,22 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     };
     w.addEventListener('message', handler);
     w.postMessage({ action: 'runMonteCarlo', params, numSamps });
+  },
+
+  runComparison: (label, compParams, numSamps = 2000) => {
+    set({ isComparingRunning: true, comparisonResults: null, comparisonLabel: label });
+    const w = getWorker();
+
+    const handler = (e: MessageEvent<WorkerResponse>) => {
+      if (e.data.action === 'runMonteCarlo') {
+        w.removeEventListener('message', handler);
+        set({
+          comparisonResults: e.data.results,
+          isComparingRunning: false,
+        });
+      }
+    };
+    w.addEventListener('message', handler);
+    w.postMessage({ action: 'runMonteCarlo', params: compParams, numSamps });
   },
 }));
