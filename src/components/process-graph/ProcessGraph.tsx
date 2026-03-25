@@ -84,15 +84,15 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
       layoutOptions: {
         'elk.algorithm': 'layered',
         'elk.direction': 'DOWN',
-        'elk.spacing.nodeNode': '80',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-        'elk.layered.spacing.edgeNodeBetweenLayers': '50',
+        'elk.spacing.nodeNode': '50',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '70',
+        'elk.layered.spacing.edgeNodeBetweenLayers': '30',
         'elk.edgeRouting': 'SPLINES',
       },
       children: filteredNodes.map((n) => ({
         id: n.activity,
-        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 60 : 170,
-        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 80 : 110,
+        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 50 : 150,
+        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 60 : 95,
       })),
       edges: filteredEdges.map((e, i) => ({
         id: `e-${i}`,

@@ -119,10 +119,14 @@ export function IndexPage() {
             <div className="bg-white rounded-lg shadow border" style={{ height: 700 }}>
               <ProcessGraph />
             </div>
-            <div className="mt-3 flex gap-4 text-xs text-gray-400">
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#ff8c00] inline-block" /> Activity</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#0091ea] inline-block" /> Start / End</span>
-              <span>Edge labels show case frequency. Use scroll to zoom, drag to pan.</span>
+            <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#607d8b] inline-block" /> Registration / Checkout</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#ff9800] inline-block" /> Waiting</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#4caf50] inline-block" /> Clinical Team</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#00897b] inline-block" /> Handoff</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#1976d2] inline-block" /> Attending</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#f57c00] inline-block" /> Optional</span>
+              <span className="text-gray-400">Edge labels show case frequency. Scroll to zoom, drag to pan.</span>
             </div>
           </Section>
         )}
