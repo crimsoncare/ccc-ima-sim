@@ -36,6 +36,7 @@ export const ProcessEdge = memo(function ProcessEdge({
   data,
   style = {},
   markerEnd,
+  selected,
 }: EdgeProps) {
   const d = data as ProcessEdgeData | undefined;
   const freq = d?.frequency ?? 0;
@@ -81,7 +82,8 @@ export const ProcessEdge = memo(function ProcessEdge({
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
           strokeDasharray: isDashed ? '10 5' : undefined,
-          opacity: 0.85,
+          opacity: selected ? 1 : 0.85,
+          filter: selected ? 'drop-shadow(0 0 4px rgba(59, 130, 246, 0.6))' : undefined,
         }}
         markerEnd={markerEnd}
       />

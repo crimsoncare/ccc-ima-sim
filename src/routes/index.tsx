@@ -225,6 +225,15 @@ export function IndexPage() {
           )}
         </div>
 
+        {/* Loading skeleton */}
+        {!dfg && isRunning && (
+          <div className="mb-16">
+            <div className="h-6 w-64 bg-gray-200 rounded animate-pulse mb-3" />
+            <div className="h-4 w-96 bg-gray-100 rounded animate-pulse mb-5" />
+            <div className="bg-gray-100 rounded-xl animate-pulse" style={{ height: 400 }} />
+          </div>
+        )}
+
         {/* ── 1. THE DISCOVERY ─────────────────────────────── */}
         {dfg && (
           <NarrativeSection
