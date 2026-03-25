@@ -16,9 +16,10 @@ export function RootLayout() {
 
   return (
     <div className="flex flex-col h-screen">
-      <nav className="bg-[#1a1a2e] text-white px-4 py-2 flex items-center gap-6 shadow-md">
-        <div className="font-bold text-lg mr-4 text-[#ff8c00]">
-          Process Mining Explorer
+      <nav className="bg-[#1a1a2e] text-white px-6 flex items-center gap-1 shadow-lg border-b border-white/10">
+        <div className="font-bold text-lg mr-6 py-3 flex items-center gap-2">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff8c00" strokeWidth="2.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+          <span className="text-white">CCC-IMA</span>
         </div>
         {navItems.map((item) => {
           const isActive = currentPath === item.to ||
@@ -27,10 +28,10 @@ export function RootLayout() {
             <Link
               key={item.to}
               to={item.to}
-              className={`text-sm px-3 py-1.5 rounded transition-colors ${
+              className={`text-sm px-3 py-3 transition-colors border-b-2 ${
                 isActive
-                  ? 'bg-white/20 text-white'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
+                  ? 'border-[#ff8c00] text-white font-medium'
+                  : 'border-transparent text-white/60 hover:text-white hover:border-white/30'
               }`}
             >
               {item.label}

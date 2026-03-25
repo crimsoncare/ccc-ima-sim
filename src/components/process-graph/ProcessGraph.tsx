@@ -91,8 +91,8 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
       },
       children: filteredNodes.map((n) => ({
         id: n.activity,
-        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 50 : 150,
-        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 60 : 95,
+        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 40 : 145,
+        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 55 : 50,
       })),
       edges: filteredEdges.map((e, i) => ({
         id: `e-${i}`,

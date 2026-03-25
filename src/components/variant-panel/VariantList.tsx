@@ -1,6 +1,7 @@
 /**
  * List of process variants with color-coded activity sequences.
  */
+import { useState } from 'react';
 import { useMiningStore } from '@/store/mining-store';
 
 function getActivityColor(activity: string): string {
@@ -25,6 +26,8 @@ function getActivityColor(activity: string): string {
 export function VariantList() {
   const { variants, selectedVariantIds, toggleVariant, setSelectedVariantIds } =
     useMiningStore();
+
+  const [visibleCount, setVisibleCount] = useState(5);
 
   if (!variants || variants.length === 0) return null;
 
@@ -71,9 +74,9 @@ export function VariantList() {
         </button>
       </div>
 
-      {/* Variant cards */}
+      {/* Variant cards — progressive disclosure */}
       <div className="space-y-2">
-        {variants.map((variant) => {
+        {variants.slice(0, visibleCount).map((variant) => {
           const selected = selectedVariantIds.has(variant.id);
           const barWidth = (variant.frequency / maxFrequency) * 100;
           return (
@@ -123,6 +126,28 @@ export function VariantList() {
           );
         })}
       </div>
+
+      {/* Show more / show less */}
+      {variants.length > 5 && (
+        <div className="flex justify-center gap-2 mt-3">
+          {visibleCount < variants.length && (
+            <button
+              onClick={() => setVisibleCount(Math.min(variants.length, visibleCount + 5))}
+              className="text-xs text-[#0091ea] hover:underline"
+            >
+              Show more ({variants.length - visibleCount} remaining)
+            </button>
+          )}
+          {visibleCount > 5 && (
+            <button
+              onClick={() => setVisibleCount(5)}
+              className="text-xs text-gray-400 hover:underline"
+            >
+              Show less
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -10,13 +10,12 @@ import { computeAllThroughputTimes } from '@/mining/throughput';
 
 // ── Insight card ──────────────────────────────────────────
 function Insight({ label, value, sub, color = 'blue' }: { label: string; value: string; sub?: string; color?: string }) {
-  const bg = color === 'orange' ? 'bg-orange-50 border-orange-200' : color === 'red' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200';
-  const text = color === 'orange' ? 'text-orange-700' : color === 'red' ? 'text-red-700' : 'text-blue-700';
+  const accent = color === 'orange' ? 'text-orange-600' : color === 'red' ? 'text-red-600' : 'text-gray-900';
   return (
-    <div className={`rounded-lg border p-4 ${bg}`}>
-      <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${text}`}>{value}</div>
-      {sub && <div className="text-xs text-gray-500 mt-1">{sub}</div>}
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className={`text-3xl font-extrabold mt-1 ${accent}`}>{value}</div>
+      {sub && <div className="text-xs text-gray-400 mt-1.5">{sub}</div>}
     </div>
   );
 }
@@ -73,11 +72,8 @@ export function IndexPage() {
           <h1 className="text-3xl font-bold text-gray-900">
             Crimson Care Collaborative — Clinic Performance Analysis
           </h1>
-          <p className="text-gray-500 mt-2 max-w-3xl">
-            Process mining analysis of patient flow through the CCC-IMA student-run clinic at
-            Massachusetts General Hospital. 5,000 realistic clinic sessions were generated using
-            a discrete event simulation calibrated from actual clinic operations data, then analyzed
-            using process mining to discover bottlenecks, pathway variations, and optimization opportunities.
+          <p className="text-gray-400 mt-2 max-w-2xl text-sm">
+            Process mining analysis of 5,000 simulated clinic sessions, revealing bottlenecks, pathway variations, and optimization opportunities.
           </p>
 
           {isRunning && (
