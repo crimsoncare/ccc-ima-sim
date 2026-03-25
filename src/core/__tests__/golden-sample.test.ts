@@ -1,17 +1,18 @@
 /**
- * Golden Sample Test
+ * Deterministic Regression Test
  *
  * This test captures the EXACT output of a deterministic simulation run
- * using seed=42 with example.json parameters. It serves as the baseline
- * to guarantee that the TypeScript port faithfully reproduces the ES5 behavior.
+ * using seed=42 (mulberry32 PRNG) with example.json parameters.
  *
- * TDD Process:
- * 1. RED: Write this test with expected values from the ES5 code
- * 2. GREEN: Port the ES5 code to TypeScript, making tests pass
- * 3. REFACTOR: Clean up TypeScript code while keeping tests green
+ * IMPORTANT: These values were captured from the TypeScript implementation,
+ * NOT from the legacy ES5 code. The ES5 code used Math.random() (V8's
+ * xorshift128+), which produces a different sequence than mulberry32.
+ * Therefore this test proves DETERMINISTIC CONSISTENCY of the TS port,
+ * not behavioral equivalence with the ES5 original.
  *
- * If these tests break, it means the simulation logic has diverged from
- * the original ES5 implementation.
+ * The simulation STRUCTURE (state machine, scheduling algorithm, meeting
+ * logic) is ported faithfully from ES5, but the exact numeric outputs
+ * will differ due to the different PRNG.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { setRandomSeed } from '../math';

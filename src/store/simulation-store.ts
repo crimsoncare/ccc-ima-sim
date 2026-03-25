@@ -105,18 +105,29 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           time: 0,
         };
 
-        // Give unique case IDs per simulation run
+        // Create shallow copies with unique case IDs per simulation run
+        // (do NOT mutate original actor objects)
         let idx = 0;
+        const allActorsCopy: Actor[][] = [];
         for (const actors of allActors) {
+          const actorsCopy: Actor[] = [];
           for (const actor of actors) {
-            if (actor.type === 'Patient') {
-              actor.id = `${actor.id}_run${idx}`;
+            const copy = Object.create(Object.getPrototypeOf(actor));
+            Object.assign(copy, actor);
+            if (copy.type === 'Patient') {
+              copy.id = `${actor.id}_run${idx}`;
             }
+            actorsCopy.push(copy);
           }
+          allActorsCopy.push(actorsCopy);
           idx++;
         }
 
-        const eventLog = extractEventLog(combinedSim);
+        const combinedSim2 = {
+          actors: allActorsCopy.flat(),
+          time: 0,
+        };
+        const eventLog = extractEventLog(combinedSim2);
         const dfg = computeDFG(eventLog);
         const variants = extractVariants(eventLog);
         const happyPath = computeHappyPath(eventLog);

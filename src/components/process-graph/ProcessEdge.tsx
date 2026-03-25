@@ -38,8 +38,8 @@ export const ProcessEdge = memo(function ProcessEdge({
   });
 
   const frequency = edgeData?.frequency ?? 0;
-  const maxFreq = 100; // Will be normalized
-  const strokeWidth = Math.max(1.5, Math.min(4, (frequency / maxFreq) * 4));
+  // Stroke width scales logarithmically with frequency for better visual spread
+  const strokeWidth = frequency > 0 ? Math.max(1.5, Math.min(5, 1.5 + Math.log2(frequency))) : 1.5;
 
   return (
     <>

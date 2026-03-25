@@ -26,10 +26,16 @@ export function computeThroughputTime(
       return getMedian(values);
     case 'trimmed_mean':
       return getTrimmedMean(values, 0.1); // Trim 10% from each end
-    case 'max':
-      return Math.max(...values);
-    case 'min':
-      return Math.min(...values);
+    case 'max': {
+      let max = -Infinity;
+      for (const v of values) if (v > max) max = v;
+      return max;
+    }
+    case 'min': {
+      let min = Infinity;
+      for (const v of values) if (v < min) min = v;
+      return min;
+    }
     default:
       return getMedian(values);
   }
@@ -105,8 +111,11 @@ export function createThroughputHistogram(
 ): { bins: number[]; counts: number[] } {
   if (values.length === 0) return { bins: [], counts: [] };
 
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  let min = Infinity, max = -Infinity;
+  for (const v of values) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+  }
   const width = max === min ? 1 : (max - min) / numBins;
 
   const bins: number[] = [];
