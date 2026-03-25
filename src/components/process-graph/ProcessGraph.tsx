@@ -186,8 +186,8 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.1}
+        fitViewOptions={{ padding: 0.3, maxZoom: 0.65 }}
+        minZoom={0.15}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}
       >
