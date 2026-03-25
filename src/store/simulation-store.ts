@@ -169,7 +169,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
     }, 10);
   },
 
-  runMonteCarlo: (numSamps = 100, overrideParams) => {
+  runMonteCarlo: (numSamps = 5000, overrideParams) => {
     set({ isRunning: true, monteCarloResults: null });
     const params = overrideParams ?? get().params;
     const w = getWorker();
@@ -185,7 +185,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         // Also generate mining data from quick batch runs for the Process Explorer
         // This creates variant diversity across multiple random runs
         setTimeout(() => {
-          const batchSize = Math.min(numSamps, 30);
+          const batchSize = Math.min(numSamps, 100);
           const allActorsCopy: Actor[] = [];
           for (let i = 0; i < batchSize; i++) {
             const sim = new Simulation();

@@ -17,7 +17,7 @@ export function SimulationPage() {
   }, [runSimulation]);
 
   const handleRunMonteCarlo = useCallback(() => {
-    runMonteCarlo(100);
+    runMonteCarlo(5000);
   }, [runMonteCarlo]);
 
   const handleSaveParams = useCallback(

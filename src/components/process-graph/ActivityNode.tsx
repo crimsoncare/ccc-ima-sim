@@ -26,40 +26,42 @@ export const ActivityNode = memo(function ActivityNode({
     <div className="flex flex-col items-center">
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-none !w-0 !h-0" />
 
-      {/* Activity circle */}
+      {/* Activity circle — Celonis-style with name inside */}
       <div
         className={`
-          flex items-center justify-center rounded-full shadow-md
-          transition-all duration-200 hover:scale-105 cursor-pointer
+          flex items-center justify-center rounded-full shadow-lg
+          transition-all duration-200 hover:scale-110 hover:shadow-xl cursor-pointer
+          border-3
           ${isStartEnd
-            ? 'w-10 h-10 bg-[#0091ea] border-2 border-[#0077c2]'
-            : 'w-14 h-14 bg-[#ff8c00] border-2 border-[#e67e00]'
+            ? 'w-12 h-12 bg-[#0091ea] border-[#0077c2]'
+            : 'w-[72px] h-[72px] bg-[#ff8c00] border-[#e67e00]'
           }
         `}
+        title={`${nodeData.label}\n${nodeData.frequency} cases`}
       >
         {isStart && (
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="white">
             <polygon points="4,2 14,8 4,14" />
           </svg>
         )}
         {isEnd && (
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="white">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="white">
             <circle cx="8" cy="8" r="6" fill="none" stroke="white" strokeWidth="2" />
             <circle cx="8" cy="8" r="3" fill="white" />
           </svg>
         )}
       </div>
 
-      {/* Activity label */}
-      <div className="mt-1 text-center max-w-[120px]">
-        <div className="text-[10px] font-semibold text-gray-700 leading-tight truncate">
+      {/* Activity label — visible, not truncated */}
+      <div className="mt-1.5 text-center max-w-[160px]">
+        <div className="text-[11px] font-bold text-gray-800 leading-tight whitespace-nowrap">
           {nodeData.label}
         </div>
-        <div className="text-[9px] text-gray-500 font-mono">
+        <div className="text-[10px] text-gray-500 font-mono">
           {typeof nodeData.frequency === 'number' ? nodeData.frequency.toLocaleString() : ''}
         </div>
         {nodeData.kpiValue && (
-          <div className="text-[9px] text-[#0091ea] font-mono">{nodeData.kpiValue}</div>
+          <div className="text-[10px] text-[#0091ea] font-mono font-semibold">{nodeData.kpiValue}</div>
         )}
       </div>
 
