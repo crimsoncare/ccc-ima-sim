@@ -1,19 +1,29 @@
 /**
- * Custom React Flow edge styled like Celonis edges.
- * Dashed bezier edge with frequency label.
+ * Custom React Flow edge — Celonis Studio-style with orthogonal routing,
+ * thickness proportional to frequency, and color intensity scaling.
  */
 import { memo } from 'react';
 import {
-  getBezierPath,
+  getSmoothStepPath,
   EdgeLabelRenderer,
   type EdgeProps,
 } from '@xyflow/react';
 
 export interface ProcessEdgeData {
   frequency: number;
+  maxFrequency?: number;
   hideLabel?: boolean;
   throughputTime?: string;
   [key: string]: unknown;
+}
+
+// Frequency → color intensity (light blue → deep blue/purple)
+function getEdgeColor(freq: number, maxFreq: number): string {
+  const ratio = maxFreq > 0 ? Math.min(freq / maxFreq, 1) : 0.5;
+  if (ratio > 0.7) return '#1a237e'; // deep indigo for high-frequency
+  if (ratio > 0.4) return '#1565c0'; // medium blue
+  if (ratio > 0.15) return '#42a5f5'; // light blue
+  return '#90caf9'; // very light blue for rare paths
 }
 
 export const ProcessEdge = memo(function ProcessEdge({
@@ -28,19 +38,20 @@ export const ProcessEdge = memo(function ProcessEdge({
   style = {},
   markerEnd,
 }: EdgeProps) {
-  const edgeData = data as ProcessEdgeData | undefined;
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
+  const d = data as ProcessEdgeData | undefined;
+  const freq = d?.frequency ?? 0;
+  const maxFreq = d?.maxFrequency ?? 100;
+
+  // SmoothStep = orthogonal routing (subway-map style like Celonis Studio)
+  const [edgePath, labelX, labelY] = getSmoothStepPath({
+    sourceX, sourceY, sourcePosition,
+    targetX, targetY, targetPosition,
+    borderRadius: 8,
   });
 
-  const frequency = edgeData?.frequency ?? 0;
-  // Stroke width scales logarithmically with frequency for better visual spread
-  const strokeWidth = frequency > 0 ? Math.max(1.5, Math.min(5, 1.5 + Math.log2(frequency))) : 1.5;
+  // Thickness scales with frequency: 2px (rare) → 6px (very common)
+  const strokeWidth = Math.max(2, Math.min(6, 2 + (freq / Math.max(maxFreq, 1)) * 4));
+  const color = getEdgeColor(freq, maxFreq);
 
   return (
     <>
@@ -50,13 +61,15 @@ export const ProcessEdge = memo(function ProcessEdge({
         d={edgePath}
         style={{
           ...style,
-          stroke: '#0091ea',
+          stroke: color,
           strokeWidth,
-          strokeDasharray: frequency < 5 ? '5 5' : undefined,
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          opacity: 0.8,
         }}
         markerEnd={markerEnd}
       />
-      {!edgeData?.hideLabel && (
+      {!d?.hideLabel && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -64,12 +77,9 @@ export const ProcessEdge = memo(function ProcessEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'all',
             }}
-            className="bg-white/90 px-1.5 py-0.5 rounded text-[10px] text-gray-600 font-mono shadow-sm border border-gray-100 cursor-pointer hover:bg-blue-50"
+            className="rounded text-[9px] font-mono font-semibold cursor-pointer"
           >
-            {frequency.toLocaleString()}
-            {edgeData?.throughputTime && (
-              <span className="ml-1 text-[#0091ea]">{edgeData.throughputTime}</span>
-            )}
+            <span style={{ color }}>{freq.toLocaleString()}</span>
           </div>
         </EdgeLabelRenderer>
       )}

@@ -87,7 +87,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         'elk.spacing.nodeNode': '50',
         'elk.layered.spacing.nodeNodeBetweenLayers': '70',
         'elk.layered.spacing.edgeNodeBetweenLayers': '30',
-        'elk.edgeRouting': 'SPLINES',
+        'elk.edgeRouting': 'ORTHOGONAL',
       },
       children: filteredNodes.map((n) => ({
         id: n.activity,
@@ -134,24 +134,26 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           };
         });
 
-        // Compute frequency threshold: hide labels below 30th percentile when there are many edges
+        // Compute frequency threshold and max for edge styling
         const freqThreshold = filteredEdges.length > 10
           ? filteredEdges.map(e => e.frequency).sort((a, b) => a - b)[Math.floor(filteredEdges.length * 0.3)]
           : 0;
+        const maxFrequency = Math.max(...filteredEdges.map(e => e.frequency), 1);
 
-        const newEdges: Edge[] = filteredEdges.map((e, i) => ({
+        const newEdges: Edge[] = filteredEdges.map((e) => ({
           id: `${e.source}->${e.target}`,
           source: e.source,
           target: e.target,
           type: 'process',
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 12,
-            height: 12,
-            color: '#0091ea',
+            width: 10,
+            height: 10,
+            color: '#1565c0',
           },
           data: {
             frequency: e.frequency,
+            maxFrequency,
             hideLabel: e.frequency < freqThreshold,
             throughputTime:
               kpiType === 'throughput_time'
