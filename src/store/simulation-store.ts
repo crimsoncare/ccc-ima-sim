@@ -82,12 +82,11 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         miningStore.setVariants(variants);
         miningStore.setHappyPath(happyPath);
 
-        // Initialize visible nodes/edges from happy path
-        if (happyPath) {
-          const elements = getHappyPathElements(happyPath);
-          miningStore.setVisibleNodes(elements.activities);
-          miningStore.setVisibleEdges(elements.edges);
-        }
+        // Show ALL activities by default for a rich branching graph
+        const allNodes = new Set(dfg.nodes.map(n => n.activity));
+        const allEdges = new Set(dfg.edges.map(e => `${e.source}->${e.target}`));
+        miningStore.setVisibleNodes(allNodes);
+        miningStore.setVisibleEdges(allEdges);
       } catch (e) {
         console.error('Simulation failed:', e);
         set({ isRunning: false });
@@ -212,11 +211,11 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           miningStore.setVariants(variants);
           miningStore.setHappyPath(happyPath);
 
-          if (happyPath) {
-            const elements = getHappyPathElements(happyPath);
-            miningStore.setVisibleNodes(elements.activities);
-            miningStore.setVisibleEdges(elements.edges);
-          }
+          // Show ALL activities for rich branching graph
+          const allNodes = new Set(dfg.nodes.map(n => n.activity));
+          const allEdges = new Set(dfg.edges.map(e => `${e.source}->${e.target}`));
+          miningStore.setVisibleNodes(allNodes);
+          miningStore.setVisibleEdges(allEdges);
         }, 50);
       }
     };

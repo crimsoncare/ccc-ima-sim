@@ -65,7 +65,7 @@ export function IndexPage() {
   const simTime = lastSimulation ? `${lastSimulation.time.toFixed(0)} min` : '—';
 
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
+    <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* ── HERO ─────────────────────────────────────────── */}
@@ -116,7 +116,7 @@ export function IndexPage() {
             title="How Patients Move Through Your Clinic"
             subtitle="The process graph shows all observed pathways from registration through discharge. Larger nodes indicate higher case volume. Branching reveals how different case types (urgent care, new patients, follow-ups) take different paths."
           >
-            <div className="bg-white rounded-lg shadow border" style={{ height: 500 }}>
+            <div className="bg-white rounded-lg shadow border" style={{ height: 700 }}>
               <ProcessGraph />
             </div>
             <div className="mt-3 flex gap-4 text-xs text-gray-400">
