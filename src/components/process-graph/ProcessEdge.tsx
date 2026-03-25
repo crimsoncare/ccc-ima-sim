@@ -86,13 +86,13 @@ export const ProcessEdge = memo(function ProcessEdge({
           className="flex flex-col items-center gap-0.5"
         >
           {!d?.hideLabel && (
-            <span className="text-[10px] font-mono font-bold leading-none" style={{ color }}>
+            <span className="text-[11px] font-mono font-bold leading-none" style={{ color }}>
               {freq.toLocaleString()}
             </span>
           )}
           {throughputTime && (
-            <span className="text-[10px] font-mono text-gray-500 leading-none whitespace-nowrap">
-              ⏱ {throughputTime}
+            <span className="text-xs font-semibold text-gray-600 bg-white/90 px-1 rounded leading-none whitespace-nowrap shadow-sm">
+              {throughputTime}
             </span>
           )}
         </div>

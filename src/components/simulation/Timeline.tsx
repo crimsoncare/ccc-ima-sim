@@ -222,12 +222,12 @@ function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeav
     >
       {/* Label */}
       <div
-        className="shrink-0 overflow-hidden cursor-pointer select-none"
-        style={{ width: '8em' }}
+        className="shrink-0 overflow-hidden cursor-pointer select-none text-ellipsis whitespace-nowrap"
+        style={{ width: '10em' }}
         onMouseEnter={actor ? () => onMouseEnter(actor.id) : undefined}
         onMouseLeave={actor ? onMouseLeave : undefined}
       >
-        {actor?.id ?? ''}
+        {actor?.id?.replace('ClinicalTeam', 'CT') ?? ''}
       </div>
       {/* Events track */}
       <div className="relative" style={{ width: timelineWidth, height: '1.6em' }}>

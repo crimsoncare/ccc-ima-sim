@@ -6,8 +6,6 @@ import {
   ReactFlow,
   Controls,
   MiniMap,
-  Background,
-  BackgroundVariant,
   useNodesState,
   useEdgesState,
   MarkerType,
@@ -218,7 +216,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           }
           position="bottom-right"
         />
-        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
+        {/* Clean white background — Celonis standard (no dots/grid) */}
       </ReactFlow>
     </div>
   );

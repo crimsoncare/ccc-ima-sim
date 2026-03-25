@@ -457,9 +457,36 @@ function ChartSection({ title, children, defaultOpen = true }: {
 
 // -- Main Component ----------------------------------------------------------
 
+function SummaryKPI({ value, label, color }: { value: string; label: string; color?: string }) {
+  return (
+    <div className="text-center px-3">
+      <div className={`text-xl font-bold ${color ?? 'text-gray-900'}`}>{value}</div>
+      <div className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">{label}</div>
+    </div>
+  );
+}
+
 export function MonteCarloCharts({ results }: { results: MonteCarloResults }) {
+  // Compute summary KPIs
+  const medianClinicTime = results.times.pct50;
+  const pct95ClinicTime = results.times.pct95;
+  const avgPatientWait = results.patients.reduce((s, p) => {
+    const w = p.waitingForClinicalTeam;
+    return s + (w?.mean ?? 0);
+  }, 0) / results.patients.length;
+  const preferredRate = results.patients.reduce((s, p) =>
+    s + p.seenByPreferredClinicalTeam, 0) / results.patients.length;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
+      {/* Summary KPIs — like Celonis Conformance Overview */}
+      <div className="col-span-1 lg:col-span-2 flex items-center justify-around bg-gray-50 rounded-lg py-4 border border-gray-100">
+        <SummaryKPI value={formatDuration(medianClinicTime)} label="Median Clinic Time" />
+        <SummaryKPI value={formatDuration(pct95ClinicTime)} label="95th Percentile" color="text-amber-600" />
+        <SummaryKPI value={`${avgPatientWait.toFixed(0)} min`} label="Avg Wait for CT" />
+        <SummaryKPI value={`${preferredRate.toFixed(0)}%`} label="Preferred Provider" color="text-green-600" />
+      </div>
+
       {/* Patient Experience */}
       <ChartSection title="Patient Experience">
         <ClinicEndTimeHistogram results={results} />

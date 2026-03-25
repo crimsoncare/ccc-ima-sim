@@ -82,11 +82,21 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         miningStore.setVariants(variants);
         miningStore.setHappyPath(happyPath);
 
-        // Show ALL activities by default for a rich branching graph
-        const allNodes = new Set(dfg.nodes.map(n => n.activity));
-        const allEdges = new Set(dfg.edges.map(e => `${e.source}->${e.target}`));
-        miningStore.setVisibleNodes(allNodes);
-        miningStore.setVisibleEdges(allEdges);
+        // Show top ~65% of activities by frequency for a readable graph (Celonis-style)
+        const sorted = [...dfg.nodes].sort((a, b) => b.frequency - a.frequency);
+        const topCount = Math.max(12, Math.ceil(sorted.length * 0.65));
+        const topNodes = new Set(sorted.slice(0, topCount).map(n => n.activity));
+        // Always include start/end
+        for (const n of dfg.nodes) {
+          if (n.activity === 'Process Start' || n.activity === 'Process End') topNodes.add(n.activity);
+        }
+        const topEdges = new Set(
+          dfg.edges
+            .filter(e => topNodes.has(e.source) && topNodes.has(e.target))
+            .map(e => `${e.source}->${e.target}`)
+        );
+        miningStore.setVisibleNodes(topNodes);
+        miningStore.setVisibleEdges(topEdges);
       } catch (e) {
         console.error('Simulation failed:', e);
         set({ isRunning: false });

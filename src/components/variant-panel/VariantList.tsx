@@ -148,6 +148,20 @@ export function VariantList() {
           )}
         </div>
       )}
+
+      {/* Coverage summary — Celonis pattern */}
+      <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-center gap-6 text-xs">
+        <div className="text-center">
+          <span className="text-lg font-bold text-[#0091ea]">{selectedCount}</span>
+          <span className="text-gray-400 ml-1">of {variants.length} variants</span>
+        </div>
+        <div className="text-center">
+          <span className="text-lg font-bold text-[#0091ea]">
+            {(variants.filter(v => selectedVariantIds.has(v.id)).reduce((s, v) => s + v.frequency, 0) / totalCases * 100).toFixed(0)}%
+          </span>
+          <span className="text-gray-400 ml-1">of cases covered</span>
+        </div>
+      </div>
     </div>
   );
 }

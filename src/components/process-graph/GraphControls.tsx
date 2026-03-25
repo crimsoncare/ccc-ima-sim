@@ -76,7 +76,7 @@ export function GraphControls() {
             </span>
           </div>
         </div>
-        <div className="text-center text-gray-400 mb-2">of activities</div>
+        <div className="text-center text-gray-400 mb-2">{visibleActivityCount} of {totalActivities} activities</div>
         <div className="flex items-center justify-between gap-1">
           {hiddenNodes.length < totalActivities && (
             <button
@@ -139,7 +139,7 @@ export function GraphControls() {
             </span>
           </div>
         </div>
-        <div className="text-center text-gray-400 mb-1">of connections</div>
+        <div className="text-center text-gray-400 mb-1">{visibleEdges.size} of {totalConnections} connections</div>
       </div>
 
       {/* Divider */}
