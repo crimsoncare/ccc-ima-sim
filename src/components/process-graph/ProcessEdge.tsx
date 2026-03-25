@@ -1,7 +1,9 @@
 /**
- * Custom React Flow edge — Celonis-style multicolor edges.
- * Color is determined by the clinical phase of the SOURCE activity,
- * creating distinct visual flows like Celonis's purple/teal/cyan/orange paths.
+ * Custom React Flow edge using ELK's actual orthogonal bend points.
+ *
+ * Instead of React Flow's getSmoothStepPath (which ignores ELK's routing),
+ * we use the pre-computed SVG path from ELK's ElkEdgeSection data,
+ * with rounded corners at bend points for a polished subway-map feel.
  */
 import { memo } from 'react';
 import {
@@ -15,7 +17,11 @@ export interface ProcessEdgeData {
   maxFrequency?: number;
   hideLabel?: boolean;
   throughputTime?: string;
-  edgeColor?: string; // Phase-based color from ProcessGraph
+  edgeColor?: string;
+  // ELK-computed path and label position
+  elkPath?: string;
+  elkLabelX?: number;
+  elkLabelY?: number;
   [key: string]: unknown;
 }
 
@@ -36,21 +42,30 @@ export const ProcessEdge = memo(function ProcessEdge({
   const maxFreq = d?.maxFrequency ?? 100;
   const ratio = maxFreq > 0 ? Math.min(freq / maxFreq, 1) : 0.5;
 
-  const [edgePath, labelX, labelY] = getSmoothStepPath({
-    sourceX, sourceY, sourcePosition,
-    targetX, targetY, targetPosition,
-    borderRadius: 12,
-  });
+  // Use ELK's pre-computed path if available, else fall back to React Flow
+  let edgePath: string;
+  let labelX: number;
+  let labelY: number;
 
-  // Bold thickness: 4px (rare) → 12px (very common) — Celonis-heavy
+  if (d?.elkPath) {
+    edgePath = d.elkPath;
+    labelX = d.elkLabelX ?? 0;
+    labelY = d.elkLabelY ?? 0;
+  } else {
+    const [fp, fx, fy] = getSmoothStepPath({
+      sourceX, sourceY, sourcePosition,
+      targetX, targetY, targetPosition,
+      borderRadius: 12,
+    });
+    edgePath = fp;
+    labelX = fx;
+    labelY = fy;
+  }
+
+  // Bold thickness: 4px (rare) → 12px (very common)
   const strokeWidth = Math.max(4, Math.min(12, 4 + ratio * 8));
-
-  // Phase-based color from data, fallback to indigo
   const color = d?.edgeColor ?? '#5c6bc0';
-
-  // Dashed for low-frequency edges
   const isDashed = ratio < 0.15;
-
   const throughputTime = d?.throughputTime as string | undefined;
 
   return (
