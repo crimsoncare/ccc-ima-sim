@@ -3,8 +3,10 @@ import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
 import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
 import { useMiningStore } from '@/store/mining-store';
 import { useSimulationStore } from '@/store/simulation-store';
+import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
 
 export function VariantExplorerPage() {
+  useEnsureSimulation();
   const { variants, selectedVariantIds } = useMiningStore();
   const { lastSimulation, runSimulation, isRunning } = useSimulationStore();
 

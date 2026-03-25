@@ -184,7 +184,7 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         // Also generate mining data from quick batch runs for the Process Explorer
         // This creates variant diversity across multiple random runs
         setTimeout(() => {
-          const batchSize = Math.min(numSamps, 100);
+          const batchSize = Math.min(numSamps, 500);
           const allActorsCopy: Actor[] = [];
           for (let i = 0; i < batchSize; i++) {
             const sim = new Simulation();

@@ -420,29 +420,37 @@ function AttendingWaitingHistogram({ results }: { results: MonteCarloResults }) 
   );
 }
 
+// -- Section Header -----------------------------------------------------------
+
+function ChartSectionHeader({ title }: { title: string }) {
+  return (
+    <div className="col-span-1 lg:col-span-2 mt-4 first:mt-0">
+      <h3 className="text-base font-bold text-gray-800 border-l-4 border-[#0091ea] pl-3 py-1">
+        {title}
+      </h3>
+    </div>
+  );
+}
+
 // -- Main Component ----------------------------------------------------------
 
 export function MonteCarloCharts({ results }: { results: MonteCarloResults }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
-      {/* 1. Clinic End Time */}
+      {/* Patient Experience */}
+      <ChartSectionHeader title="Patient Experience" />
       <ClinicEndTimeHistogram results={results} />
-
-      {/* 2-4. Patient confidence bands */}
       <PatientConfidenceCharts results={results} />
 
-      {/* 5-6. Clinical team confidence bands */}
+      {/* Staff Utilization */}
+      <ChartSectionHeader title="Staff Utilization" />
       <ClinicalTeamConfidenceCharts results={results} />
-
-      {/* 7. Patients seen by clinical team */}
       <PatientsSeenChart
         title="Patients Seen by Clinical Team"
         labels={results.clinicalTeams.map((c) => c.label)}
         statsArr={results.clinicalTeams.map((c) => c.patientsSeen)}
         color="51,153,102"
       />
-
-      {/* 8. Patients seen by attending */}
       <PatientsSeenChart
         title="Patients Seen by Attending"
         labels={results.attendings.map((a) => a.label)}
@@ -450,10 +458,9 @@ export function MonteCarloCharts({ results }: { results: MonteCarloResults }) {
         color="102,51,153"
       />
 
-      {/* 9. Seen by preferred provider */}
+      {/* System Performance */}
+      <ChartSectionHeader title="System Performance" />
       <SeenByPreferredChart results={results} />
-
-      {/* 10. Attending waiting histogram */}
       <AttendingWaitingHistogram results={results} />
     </div>
   );

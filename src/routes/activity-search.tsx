@@ -1,8 +1,10 @@
 import { ActivityCoverage } from '@/components/activity/ActivityCoverage';
 import { ActivityControls } from '@/components/activity/ActivityControls';
 import { useSimulationStore } from '@/store/simulation-store';
+import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
 
 export function ActivitySearchPage() {
+  useEnsureSimulation();
   const { lastSimulation, runSimulation, isRunning } = useSimulationStore();
 
   if (!lastSimulation) {

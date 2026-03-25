@@ -8,24 +8,26 @@ import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
 import { Timeline } from '@/components/simulation/Timeline';
 import { computeAllThroughputTimes } from '@/mining/throughput';
 
-// ── Insight card ──────────────────────────────────────────
-function Insight({ label, value, sub, color = 'blue' }: { label: string; value: string; sub?: string; color?: string }) {
-  const accent = color === 'orange' ? 'text-orange-600' : color === 'red' ? 'text-red-600' : 'text-gray-900';
+// ── KPI metric ────────────────────────────────────────────
+function Metric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-      <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">{label}</div>
-      <div className={`text-3xl font-extrabold mt-1 ${accent}`}>{value}</div>
-      {sub && <div className="text-xs text-gray-400 mt-1.5">{sub}</div>}
+    <div className="text-center">
+      <div className={`text-3xl font-extrabold ${accent ? 'text-red-600' : 'text-gray-900'}`}>{value}</div>
+      <div className="text-[11px] text-gray-400 uppercase tracking-wider mt-1">{label}</div>
     </div>
   );
 }
 
-// ── Section wrapper ───────────────────────────────────────
-function Section({ id, title, subtitle, children }: { id: string; title: string; subtitle: string; children: React.ReactNode }) {
+// ── Section with narrative question ───────────────────────
+function NarrativeSection({ question, answer, children }: {
+  question: string; answer: string; children: React.ReactNode;
+}) {
   return (
-    <section id={id} className="mb-12">
-      <h2 className="text-xl font-bold text-gray-900 mb-1">{title}</h2>
-      <p className="text-sm text-gray-500 mb-4">{subtitle}</p>
+    <section className="mb-16">
+      <div className="mb-5">
+        <h2 className="text-2xl font-bold text-gray-900">{question}</h2>
+        <p className="text-sm text-gray-500 mt-1 max-w-3xl leading-relaxed">{answer}</p>
+      </div>
       {children}
     </section>
   );
@@ -35,192 +37,194 @@ export function IndexPage() {
   const { lastSimulation, monteCarloResults, runSimulation, runMonteCarlo, isRunning, params } = useSimulationStore();
   const { eventLog, dfg, variants, happyPath } = useMiningStore();
 
-  // Auto-run simulation on first load
+  // Auto-generate data on first load
   useEffect(() => {
     if (!lastSimulation && !isRunning) {
       runSimulation();
-      // After a short delay, run Monte Carlo for statistical data
       setTimeout(() => runMonteCarlo(5000), 500);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Compute bottleneck insights
   const bottleneck = useMemo(() => {
     if (!dfg) return null;
     const edgeTimes = computeAllThroughputTimes(dfg);
-    let worst = { edge: '', time: 0 };
+    let worst = { source: '', target: '', time: 0 };
     for (const e of edgeTimes) {
-      if (e.aggregated > worst.time) {
-        worst = { edge: `${e.source}->${e.target}`, time: e.aggregated };
-      }
+      if (e.aggregated > worst.time) worst = { source: e.source, target: e.target, time: e.aggregated };
     }
-    return worst.edge ? worst : null;
+    return worst.source ? worst : null;
   }, [dfg]);
 
   const caseCount = eventLog?.cases.length ?? 0;
   const variantCount = variants?.length ?? 0;
   const activityCount = dfg?.nodes.length ?? 0;
-  const happyPathPct = happyPath ? `${happyPath.percentage.toFixed(0)}%` : '—';
-  const simTime = lastSimulation ? `${lastSimulation.time.toFixed(0)} min` : '—';
+  const happyPathPct = happyPath?.percentage.toFixed(0) ?? '—';
+
+  // Count case types from variant activities
+  const caseTypeCounts = useMemo(() => {
+    if (!variants) return { uc: 0, btcNew: 0, btcFu: 0 };
+    let uc = 0, btcNew = 0, btcFu = 0;
+    for (const v of variants) {
+      const acts = v.activities.join(' ');
+      const f = v.frequency;
+      if (acts.includes('History Taking')) btcNew += f;
+      else if (acts.includes('Chart Review')) btcFu += f;
+      else uc += f;
+    }
+    return { uc, btcNew, btcFu };
+  }, [variants]);
 
   return (
     <div className="bg-gray-50">
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* ── HERO ─────────────────────────────────────────── */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Crimson Care Collaborative — Clinic Performance Analysis
-          </h1>
-          <p className="text-gray-400 mt-2 max-w-2xl text-sm">
-            Process mining analysis of 5,000 simulated clinic sessions, revealing bottlenecks, pathway variations, and optimization opportunities.
-          </p>
-
-          {isRunning && (
-            <div className="mt-4 flex items-center gap-2 text-blue-600">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Generating 5,000 simulated clinic sessions for process mining analysis...
+        <div className="mb-12">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Clinic Performance Analysis
+              </h1>
+              <p className="text-gray-400 mt-1 text-sm">
+                Crimson Care Collaborative — Internal Medicine Associates, Massachusetts General Hospital
+              </p>
             </div>
-          )}
+            {isRunning && (
+              <div className="flex items-center gap-2 text-blue-600 text-sm">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Analyzing...
+              </div>
+            )}
+          </div>
 
           {lastSimulation && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mt-6">
-              <Insight label="Simulated Cases" value={String(caseCount)} sub={`${params.numPatients ?? 8} patients × ${Math.max(1, Math.round(caseCount / (params.numPatients ?? 8)))} sessions`} />
-              <Insight label="Unique Pathways" value={String(variantCount)} sub={`${activityCount} distinct activities`} />
-              <Insight label="Happy Path" value={happyPathPct} sub="Most common journey" />
-              <Insight label="Clinic Duration" value={simTime} sub="Single session" color="orange" />
-              <Insight label="Staff" value={`${params.numAttendings ?? 2}A / ${params.numClinicalTeams ?? 4}CT`} sub="Attendings / Clinical Teams" />
-              {bottleneck && (
-                <Insight
-                  label="Bottleneck"
-                  value={bottleneck.edge.split('->')[0]?.trim().slice(0, 16) ?? '—'}
-                  sub={`+${bottleneck.time.toFixed(1)} min avg`}
-                  color="red"
-                />
-              )}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm mt-6 p-6">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-6">
+                <Metric value={caseCount.toLocaleString()} label="Patient encounters" />
+                <Metric value={String(variantCount)} label="Unique pathways" />
+                <Metric value={String(activityCount)} label="Activities" />
+                <Metric value={`${happyPathPct}%`} label="Happy path" />
+                <Metric value={`${params.numAttendings ?? 2} / ${params.numClinicalTeams ?? 4}`} label="Attendings / Teams" />
+                {bottleneck && <Metric value={`+${bottleneck.time.toFixed(0)}m`} label="Bottleneck delay" accent />}
+              </div>
             </div>
           )}
         </div>
 
-        {/* ── THE PROCESS ──────────────────────────────────── */}
+        {/* ── 1. THE DISCOVERY ─────────────────────────────── */}
         {dfg && (
-          <Section
-            id="process"
-            title="How Patients Move Through Your Clinic"
-            subtitle="The process graph below maps every observed pathway from registration through discharge. Colors indicate different phases of the visit. Branching reveals how case types (urgent care, new patients, follow-ups) diverge into different clinical workflows before reconverging at checkout."
+          <NarrativeSection
+            question="How does the clinic actually operate?"
+            answer={`We generated ${caseCount.toLocaleString()} patient encounters across 500 simulated clinic sessions and discovered ${variantCount} unique pathways — far more than the simple 5-step model on the whiteboard. The process graph reveals how different case types diverge into distinct clinical workflows.`}
           >
-            {/* Insight callouts */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                <div className="text-xs font-semibold text-green-800">Clinical Team Phase</div>
-                <div className="text-sm text-green-700 mt-1">3 distinct pathways based on case type — new patients get full history + physical, follow-ups focus on medication review</div>
-              </div>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <div className="text-xs font-semibold text-blue-800">Attending Phase</div>
-                <div className="text-sm text-blue-700 mt-1">The attending handoff is the convergence point — all paths funnel through here, creating the primary bottleneck</div>
-              </div>
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <div className="text-xs font-semibold text-amber-800">Optional Activities</div>
-                <div className="text-sm text-amber-700 mt-1">Lab orders, imaging, and specialist referrals add complexity for ~25-60% of patients depending on case type</div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow border" style={{ height: 700 }}>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 650 }}>
               <ProcessGraph />
             </div>
-            <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#607d8b] inline-block" /> Registration / Checkout</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#ff9800] inline-block" /> Waiting</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#4caf50] inline-block" /> Clinical Team</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#00897b] inline-block" /> Handoff</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#1976d2] inline-block" /> Attending</span>
-              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-full bg-[#f57c00] inline-block" /> Optional</span>
-              <span className="text-gray-400">Edge labels show case frequency. Scroll to zoom, drag to pan.</span>
+            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#607d8b] inline-block" /> Registration</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#ef6c00] inline-block" /> Waiting</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#2e7d32] inline-block" /> Clinical Team</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#00796b] inline-block" /> Handoff</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#1565c0] inline-block" /> Attending</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#e65100] inline-block" /> Optional</span>
+              <span className="ml-auto">Scroll to zoom. Drag to pan.</span>
             </div>
-          </Section>
+          </NarrativeSection>
         )}
 
-        {/* ── PATIENT PATHWAYS ─────────────────────────────── */}
+        {/* ── 2. THE PATTERNS ──────────────────────────────── */}
         {variants && variants.length > 0 && (
-          <Section
-            id="pathways"
-            title="Patient Pathways"
-            subtitle={`${variantCount} unique journeys observed across ${caseCount} simulated visits. Each variant is one specific end-to-end path a patient takes. The most common variant covers ${happyPathPct} of all cases.`}
+          <NarrativeSection
+            question="What patterns emerge across patient journeys?"
+            answer={`Three case types create three distinct workflows: ${caseTypeCounts.uc} urgent care visits follow a streamlined path, ${caseTypeCounts.btcNew} new patients require full workups with potential lab orders, and ${caseTypeCounts.btcFu} follow-up patients focus on medication reconciliation. Only ${happyPathPct}% of patients follow the single most common path — the rest diverge.`}
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2 bg-white rounded-lg shadow border p-4 max-h-[500px] overflow-auto">
+              <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5 max-h-[520px] overflow-auto">
                 <VariantList />
               </div>
-              <div className="bg-white rounded-lg shadow border p-4">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
                 <VariantHistogram />
               </div>
             </div>
-          </Section>
+          </NarrativeSection>
         )}
 
-        {/* ── TIMELINE ─────────────────────────────────────── */}
+        {/* ── 3. THE BOTTLENECK ────────────────────────────── */}
         {lastSimulation && (
-          <Section
-            id="timeline"
-            title="Clinic Session Timeline"
-            subtitle="Gantt chart showing how attendings, clinical teams, and patients interact during a single clinic session. Hover over a row to highlight relationships between providers and patients."
+          <NarrativeSection
+            question="Where does clinic flow break down?"
+            answer={bottleneck
+              ? `The longest delay occurs at "${bottleneck.source}" → "${bottleneck.target}", adding an average of ${bottleneck.time.toFixed(1)} minutes per patient. All three case-type pathways converge at the attending handoff, creating a single point of contention that limits overall clinic throughput.`
+              : 'Analyzing bottleneck data...'}
           >
-            <div className="bg-white rounded-lg shadow border p-4 overflow-auto">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 overflow-auto">
               <Timeline actors={lastSimulation.actors} />
             </div>
-          </Section>
+            <p className="text-xs text-gray-400 mt-2">
+              Hover over a label to highlight the relationships between patients, clinical teams, and attendings.
+            </p>
+          </NarrativeSection>
         )}
 
-        {/* ── MONTE CARLO ──────────────────────────────────── */}
+        {/* ── 4. THE EVIDENCE ──────────────────────────────── */}
         {monteCarloResults && (
-          <Section
-            id="statistics"
-            title="Simulation Model Validation"
-            subtitle="The charts below show the distribution of key metrics across all 5,000 generated clinic sessions, confirming the simulation produces realistic and consistent results. Shaded bands show the 5th-95th percentile range."
+          <NarrativeSection
+            question="How confident are these findings?"
+            answer="We validated the simulation across 5,000 independent clinic sessions (40,000 patient encounters). The shaded bands show the 5th-to-95th percentile range — the findings are consistent and robust, not artifacts of a single lucky run."
           >
-            <div className="bg-white rounded-lg shadow border p-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
               <MonteCarloCharts results={monteCarloResults} />
             </div>
-          </Section>
+          </NarrativeSection>
         )}
 
-        {/* ── WHAT-IF CTA ──────────────────────────────────── */}
-        <Section
-          id="explore"
-          title="What's Next?"
-          subtitle="Process mining reveals where your clinic operates efficiently — and where improvements are possible."
+        {/* ── 5. THE OPPORTUNITY ───────────────────────────── */}
+        <NarrativeSection
+          question="What should we do next?"
+          answer="Process mining turns operational data into actionable insights. Here's what we recommend investigating further."
         >
-          <div className="bg-gradient-to-r from-blue-50 to-orange-50 rounded-lg border border-blue-100 p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-2">Staffing Policy</h3>
-                <p className="text-sm text-gray-600">
-                  Should we add a clinical team? The simulation suggests the attending is the
-                  bottleneck — adding teams without addressing attending capacity may not help.
-                </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1565c0" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-2">Scheduling</h3>
-                <p className="text-sm text-gray-600">
-                  Patient arrival patterns affect clinic flow. Staggering appointments differently
-                  could reduce peak waiting times by 30-40%.
-                </p>
+              <h3 className="font-semibold text-gray-800 mb-1.5">Attending Capacity</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                The attending handoff is the primary bottleneck. Consider overlapping attending schedules
+                or pre-rounding protocols to reduce the convergence delay.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-800 mb-2">Try It Yourself</h3>
-                <p className="text-sm text-gray-600 mb-3">
-                  Use the Simulation tab to adjust parameters and re-run the analysis with
-                  different staffing configurations.
-                </p>
-                <a href="/ccc-ima-sim/simulation" className="text-[#0091ea] text-sm font-medium hover:underline">
-                  Open Interactive Simulation →
-                </a>
+              <h3 className="font-semibold text-gray-800 mb-1.5">Scheduling Optimization</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Later patients wait disproportionately longer. Staggering new-patient appointments
+                (which take 40% longer) earlier in the session could smooth the flow.
+              </p>
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+              <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mb-3">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e65100" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
               </div>
+              <h3 className="font-semibold text-gray-800 mb-1.5">Real Data Integration</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                This analysis uses simulated data. Connecting to the clinic's patient tracker would
+                enable continuous monitoring with real operational insights.
+              </p>
             </div>
           </div>
-        </Section>
+          <div className="mt-4 text-center">
+            <a href="/ccc-ima-sim/simulation" className="inline-flex items-center gap-1.5 text-sm text-[#0091ea] font-medium hover:underline">
+              Explore the interactive simulation
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          </div>
+        </NarrativeSection>
 
       </div>
     </div>

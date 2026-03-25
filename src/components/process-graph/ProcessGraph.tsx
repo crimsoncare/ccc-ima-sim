@@ -134,6 +134,11 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           };
         });
 
+        // Compute frequency threshold: hide labels below 30th percentile when there are many edges
+        const freqThreshold = filteredEdges.length > 10
+          ? filteredEdges.map(e => e.frequency).sort((a, b) => a - b)[Math.floor(filteredEdges.length * 0.3)]
+          : 0;
+
         const newEdges: Edge[] = filteredEdges.map((e, i) => ({
           id: `${e.source}->${e.target}`,
           source: e.source,
@@ -147,6 +152,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           },
           data: {
             frequency: e.frequency,
+            hideLabel: e.frequency < freqThreshold,
             throughputTime:
               kpiType === 'throughput_time'
                 ? `${convertTimeUnit(computeThroughputTime(e, aggregationMethod), timeUnit).toFixed(1)}${getTimeUnitLabel(timeUnit)}`

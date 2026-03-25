@@ -2,8 +2,10 @@ import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
 import { GraphControls } from '@/components/process-graph/GraphControls';
 import { useMiningStore } from '@/store/mining-store';
 import { useSimulationStore } from '@/store/simulation-store';
+import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
 
 export function ProcessExplorerPage() {
+  useEnsureSimulation();
   const { dfg, happyPath, visibleNodes, visibleEdges } = useMiningStore();
   const { lastSimulation, runSimulation, isRunning } = useSimulationStore();
 

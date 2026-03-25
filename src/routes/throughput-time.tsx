@@ -1,8 +1,10 @@
 import { ThroughputHistogram } from '@/components/throughput/ThroughputHistogram';
 import { ThroughputControls } from '@/components/throughput/ThroughputControls';
 import { useSimulationStore } from '@/store/simulation-store';
+import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
 
 export function ThroughputTimePage() {
+  useEnsureSimulation();
   const { lastSimulation, runSimulation, isRunning } = useSimulationStore();
 
   if (!lastSimulation) {

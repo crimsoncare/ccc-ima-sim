@@ -4,8 +4,10 @@ import type { SimulationParams } from '@/core/simulation';
 import { Timeline } from '@/components/simulation/Timeline';
 import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
 import { ParameterModal, JSONModal } from '@/components/simulation/ParameterModal';
+import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
 
 export function SimulationPage() {
+  useEnsureSimulation();
   const { params, setParams, runSimulation, runMonteCarlo, isRunning, lastSimulation, monteCarloResults } =
     useSimulationStore();
 

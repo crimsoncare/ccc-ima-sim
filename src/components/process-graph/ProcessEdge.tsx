@@ -11,6 +11,7 @@ import {
 
 export interface ProcessEdgeData {
   frequency: number;
+  hideLabel?: boolean;
   throughputTime?: string;
   [key: string]: unknown;
 }
@@ -55,21 +56,23 @@ export const ProcessEdge = memo(function ProcessEdge({
         }}
         markerEnd={markerEnd}
       />
-      <EdgeLabelRenderer>
-        <div
-          style={{
-            position: 'absolute',
-            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            pointerEvents: 'all',
-          }}
-          className="bg-white/90 px-1.5 py-0.5 rounded text-[10px] text-gray-600 font-mono shadow-sm border border-gray-100 cursor-pointer hover:bg-blue-50"
-        >
-          {frequency.toLocaleString()}
-          {edgeData?.throughputTime && (
-            <span className="ml-1 text-[#0091ea]">{edgeData.throughputTime}</span>
-          )}
-        </div>
-      </EdgeLabelRenderer>
+      {!edgeData?.hideLabel && (
+        <EdgeLabelRenderer>
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+              pointerEvents: 'all',
+            }}
+            className="bg-white/90 px-1.5 py-0.5 rounded text-[10px] text-gray-600 font-mono shadow-sm border border-gray-100 cursor-pointer hover:bg-blue-50"
+          >
+            {frequency.toLocaleString()}
+            {edgeData?.throughputTime && (
+              <span className="ml-1 text-[#0091ea]">{edgeData.throughputTime}</span>
+            )}
+          </div>
+        </EdgeLabelRenderer>
+      )}
     </>
   );
 });
