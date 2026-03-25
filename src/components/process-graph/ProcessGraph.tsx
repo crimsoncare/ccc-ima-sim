@@ -143,7 +143,15 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         const newEdges: Edge[] = filteredEdges.map((e) => {
           // Match arrow color to edge color
           const ratio = maxFrequency > 0 ? Math.min(e.frequency / maxFrequency, 1) : 0.5;
-          const arrowColor = ratio > 0.7 ? '#1a237e' : ratio > 0.4 ? '#1565c0' : ratio > 0.15 ? '#42a5f5' : '#90caf9';
+          const arrowColor = ratio > 0.7 ? '#1a237e' : ratio > 0.4 ? '#1565c0' : ratio > 0.15 ? '#42a5f5' : '#80deea';
+
+          // Always compute throughput time for Celonis-style edge labels
+          const tTime = computeThroughputTime(e, aggregationMethod);
+          const tConverted = convertTimeUnit(tTime, timeUnit);
+          const timeLabel = tConverted > 0
+            ? `${tConverted.toFixed(1)} ${getTimeUnitLabel(timeUnit)}`
+            : undefined;
+
           return {
           id: `${e.source}->${e.target}`,
           source: e.source,
@@ -159,10 +167,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
             frequency: e.frequency,
             maxFrequency,
             hideLabel: e.frequency < freqThreshold,
-            throughputTime:
-              kpiType === 'throughput_time'
-                ? `${convertTimeUnit(computeThroughputTime(e, aggregationMethod), timeUnit).toFixed(1)}${getTimeUnitLabel(timeUnit)}`
-                : undefined,
+            throughputTime: timeLabel,
           },
         };});
 

@@ -1,6 +1,7 @@
 /**
- * Custom React Flow edge — Celonis Studio-style with orthogonal routing,
- * thickness proportional to frequency, and color intensity scaling.
+ * Custom React Flow edge — Celonis-style with orthogonal routing,
+ * thickness proportional to frequency, dashed lines for rare paths,
+ * and throughput time labels on every edge.
  */
 import { memo } from 'react';
 import {
@@ -17,13 +18,13 @@ export interface ProcessEdgeData {
   [key: string]: unknown;
 }
 
-// Frequency → color intensity (light blue → deep blue/purple)
+// Frequency → color (cyan for rare → deep indigo for common, matching classic Celonis)
 function getEdgeColor(freq: number, maxFreq: number): string {
   const ratio = maxFreq > 0 ? Math.min(freq / maxFreq, 1) : 0.5;
-  if (ratio > 0.7) return '#1a237e'; // deep indigo for high-frequency
+  if (ratio > 0.7) return '#1a237e'; // deep indigo — high-frequency
   if (ratio > 0.4) return '#1565c0'; // medium blue
   if (ratio > 0.15) return '#42a5f5'; // light blue
-  return '#90caf9'; // very light blue for rare paths
+  return '#80deea'; // cyan — rare paths (Celonis classic)
 }
 
 export const ProcessEdge = memo(function ProcessEdge({
@@ -41,18 +42,21 @@ export const ProcessEdge = memo(function ProcessEdge({
   const d = data as ProcessEdgeData | undefined;
   const freq = d?.frequency ?? 0;
   const maxFreq = d?.maxFrequency ?? 100;
+  const ratio = maxFreq > 0 ? Math.min(freq / maxFreq, 1) : 0.5;
 
-  // SmoothStep = orthogonal routing (subway-map style like Celonis Studio)
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
     borderRadius: 8,
   });
 
-  // Thickness scales with frequency: 3px (rare) → 8px (very common) — Celonis-thick
-  const strokeWidth = Math.max(3, Math.min(8, 3 + (freq / Math.max(maxFreq, 1)) * 5));
+  // Thickness: 2px (rare) → 8px (very common)
+  const strokeWidth = Math.max(2, Math.min(8, 2 + ratio * 6));
   const color = getEdgeColor(freq, maxFreq);
   const throughputTime = d?.throughputTime as string | undefined;
+
+  // Dashed for low-frequency edges (Celonis classic pattern)
+  const isDashed = ratio < 0.2;
 
   return (
     <>
@@ -66,29 +70,33 @@ export const ProcessEdge = memo(function ProcessEdge({
           strokeWidth,
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
-          opacity: 0.92,
+          strokeDasharray: isDashed ? '8 4' : undefined,
+          opacity: 0.9,
         }}
         markerEnd={markerEnd}
       />
-      {!d?.hideLabel && (
-        <EdgeLabelRenderer>
-          <div
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-              pointerEvents: 'all',
-            }}
-            className="rounded cursor-pointer flex flex-col items-center"
-          >
-            <span className="text-[10px] font-mono font-bold" style={{ color }}>{freq.toLocaleString()}</span>
-            {throughputTime && (
-              <span className="text-[10px] font-mono font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-px rounded-full shadow-sm">
-                {throughputTime}
-              </span>
-            )}
-          </div>
-        </EdgeLabelRenderer>
-      )}
+      {/* Always show throughput time; only hide frequency count on low-freq edges */}
+      <EdgeLabelRenderer>
+        <div
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'all',
+          }}
+          className="flex flex-col items-center gap-0.5"
+        >
+          {!d?.hideLabel && (
+            <span className="text-[10px] font-mono font-bold leading-none" style={{ color }}>
+              {freq.toLocaleString()}
+            </span>
+          )}
+          {throughputTime && (
+            <span className="text-[10px] font-mono text-gray-500 leading-none whitespace-nowrap">
+              ⏱ {throughputTime}
+            </span>
+          )}
+        </div>
+      </EdgeLabelRenderer>
     </>
   );
 });

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSimulationStore } from '@/store/simulation-store';
 import { useMiningStore } from '@/store/mining-store';
 import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
+import { GraphControls } from '@/components/process-graph/GraphControls';
 import { VariantList } from '@/components/variant-panel/VariantList';
 import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
 import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
@@ -177,8 +178,15 @@ export function IndexPage() {
             question="How does the clinic actually operate?"
             answer={`We generated ${caseCount.toLocaleString()} patient encounters across 500 simulated clinic sessions and discovered ${variantCount} unique pathways — far more than the simple 5-step model on the whiteboard. The process graph reveals how different case types diverge into distinct clinical workflows.`}
           >
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
-              <ProcessGraph />
+            <div className="flex gap-4">
+              {/* Process Graph */}
+              <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
+                <ProcessGraph />
+              </div>
+              {/* Celonis-style right sidebar */}
+              <div className="w-48 shrink-0 bg-white rounded-xl shadow-sm border border-gray-200 p-4 overflow-auto" style={{ height: 800 }}>
+                <GraphControls />
+              </div>
             </div>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#607d8b] inline-block" /> Registration</span>
