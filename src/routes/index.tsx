@@ -19,11 +19,11 @@ function Metric({ value, label, accent }: { value: string; label: string; accent
 }
 
 // ── Section with narrative question ───────────────────────
-function NarrativeSection({ question, answer, children }: {
-  question: string; answer: string; children: React.ReactNode;
+function NarrativeSection({ id, question, answer, children }: {
+  id?: string; question: string; answer: string; children: React.ReactNode;
 }) {
   return (
-    <section className="mb-16">
+    <section id={id} className="mb-16 scroll-mt-12">
       <div className="mb-5">
         <h2 className="text-2xl font-bold text-gray-900">{question}</h2>
         <p className="text-sm text-gray-500 mt-1 max-w-3xl leading-relaxed">{answer}</p>
@@ -74,12 +74,41 @@ export function IndexPage() {
     return { uc, btcNew, btcFu };
   }, [variants]);
 
+  const sections = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'process', label: 'Process' },
+    { id: 'patterns', label: 'Patterns' },
+    { id: 'bottleneck', label: 'Bottleneck' },
+    { id: 'evidence', label: 'Evidence' },
+    { id: 'next', label: 'Next Steps' },
+  ];
+
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 relative">
+      {/* Sticky section nav */}
+      {lastSimulation && (
+        <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-6 flex gap-1">
+            {sections.map(s => (
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className="text-xs px-3 py-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-t transition-colors"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="max-w-7xl mx-auto px-6 py-8">
 
         {/* ── HERO ─────────────────────────────────────────── */}
-        <div className="mb-12">
+        <div id="overview" className="mb-12 scroll-mt-12">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
@@ -117,6 +146,7 @@ export function IndexPage() {
         {/* ── 1. THE DISCOVERY ─────────────────────────────── */}
         {dfg && (
           <NarrativeSection
+            id="process"
             question="How does the clinic actually operate?"
             answer={`We generated ${caseCount.toLocaleString()} patient encounters across 500 simulated clinic sessions and discovered ${variantCount} unique pathways — far more than the simple 5-step model on the whiteboard. The process graph reveals how different case types diverge into distinct clinical workflows.`}
           >
@@ -138,6 +168,7 @@ export function IndexPage() {
         {/* ── 2. THE PATTERNS ──────────────────────────────── */}
         {variants && variants.length > 0 && (
           <NarrativeSection
+            id="patterns"
             question="What patterns emerge across patient journeys?"
             answer={`Three case types create three distinct workflows: ${caseTypeCounts.uc} urgent care visits follow a streamlined path, ${caseTypeCounts.btcNew} new patients require full workups with potential lab orders, and ${caseTypeCounts.btcFu} follow-up patients focus on medication reconciliation. Only ${happyPathPct}% of patients follow the single most common path — the rest diverge.`}
           >
@@ -155,6 +186,7 @@ export function IndexPage() {
         {/* ── 3. THE BOTTLENECK ────────────────────────────── */}
         {lastSimulation && (
           <NarrativeSection
+            id="bottleneck"
             question="Where does clinic flow break down?"
             answer={bottleneck
               ? `The longest delay occurs at "${bottleneck.source}" → "${bottleneck.target}", adding an average of ${bottleneck.time.toFixed(1)} minutes per patient. All three case-type pathways converge at the attending handoff, creating a single point of contention that limits overall clinic throughput.`
@@ -172,6 +204,7 @@ export function IndexPage() {
         {/* ── 4. THE EVIDENCE ──────────────────────────────── */}
         {monteCarloResults && (
           <NarrativeSection
+            id="evidence"
             question="How confident are these findings?"
             answer="We validated the simulation across 5,000 independent clinic sessions (40,000 patient encounters). The shaded bands show the 5th-to-95th percentile range — the findings are consistent and robust, not artifacts of a single lucky run."
           >
@@ -183,6 +216,7 @@ export function IndexPage() {
 
         {/* ── 5. THE OPPORTUNITY ───────────────────────────── */}
         <NarrativeSection
+          id="next"
           question="What should we do next?"
           answer="Process mining turns operational data into actionable insights. Here's what we recommend investigating further."
         >
@@ -193,8 +227,9 @@ export function IndexPage() {
               </div>
               <h3 className="font-semibold text-gray-800 mb-1.5">Attending Capacity</h3>
               <p className="text-sm text-gray-500 leading-relaxed">
-                The attending handoff is the primary bottleneck. Consider overlapping attending schedules
-                or pre-rounding protocols to reduce the convergence delay.
+                {bottleneck
+                  ? `The "${bottleneck.target}" step adds +${bottleneck.time.toFixed(0)} minutes average delay. Consider overlapping attending schedules or pre-rounding protocols.`
+                  : 'The attending handoff is the primary bottleneck. Consider overlapping attending schedules.'}
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
@@ -203,8 +238,9 @@ export function IndexPage() {
               </div>
               <h3 className="font-semibold text-gray-800 mb-1.5">Scheduling Optimization</h3>
               <p className="text-sm text-gray-500 leading-relaxed">
-                Later patients wait disproportionately longer. Staggering new-patient appointments
-                (which take 40% longer) earlier in the session could smooth the flow.
+                {caseTypeCounts.btcNew > 0
+                  ? `${caseTypeCounts.btcNew} new-patient visits take ~40% longer. Scheduling them earlier could reduce cascading delays for the ${caseTypeCounts.uc} UC patients.`
+                  : 'Staggering new-patient appointments earlier in the session could smooth the flow.'}
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
