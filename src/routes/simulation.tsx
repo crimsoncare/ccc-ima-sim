@@ -2,10 +2,11 @@ import { useState, useCallback } from 'react';
 import { useSimulationStore } from '@/store/simulation-store';
 import type { SimulationParams } from '@/core/simulation';
 import { Timeline } from '@/components/simulation/Timeline';
+import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
 import { ParameterModal, JSONModal } from '@/components/simulation/ParameterModal';
 
 export function SimulationPage() {
-  const { params, setParams, runSimulation, runMultipleSimulations, isRunning, lastSimulation } =
+  const { params, setParams, runSimulation, runMonteCarlo, isRunning, lastSimulation, monteCarloResults } =
     useSimulationStore();
 
   const [showParams, setShowParams] = useState(false);
@@ -16,8 +17,8 @@ export function SimulationPage() {
   }, [runSimulation]);
 
   const handleRunMonteCarlo = useCallback(() => {
-    runMultipleSimulations(5000);
-  }, [runMultipleSimulations]);
+    runMonteCarlo(100);
+  }, [runMonteCarlo]);
 
   const handleSaveParams = useCallback(
     (newParams: SimulationParams) => {
@@ -73,8 +74,7 @@ export function SimulationPage() {
               actors={lastSimulation.actors}
               message="<p><strong>Hint:</strong> hover over the timeline labels to highlight relationships</p>"
             />
-            {/* Monte Carlo charts placeholder */}
-            <div id="monte-carlo-charts" />
+            {monteCarloResults && <MonteCarloCharts results={monteCarloResults} />}
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
