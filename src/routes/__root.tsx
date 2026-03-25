@@ -1,4 +1,5 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router';
+import { OnboardingGuide } from '@/components/shared/OnboardingGuide';
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
@@ -37,6 +38,7 @@ export function RootLayout() {
           );
         })}
       </nav>
+      <OnboardingGuide />
       <main className="flex-1 overflow-hidden">
         <Outlet />
       </main>
