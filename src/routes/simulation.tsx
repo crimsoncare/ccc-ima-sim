@@ -1,87 +1,103 @@
+import { useState, useCallback } from 'react';
 import { useSimulationStore } from '@/store/simulation-store';
+import type { SimulationParams } from '@/core/simulation';
+import { Timeline } from '@/components/simulation/Timeline';
+import { ParameterModal, JSONModal } from '@/components/simulation/ParameterModal';
 
 export function SimulationPage() {
-  const { runSimulation, isRunning, lastSimulation } = useSimulationStore();
+  const { params, setParams, runSimulation, runMultipleSimulations, isRunning, lastSimulation } =
+    useSimulationStore();
+
+  const [showParams, setShowParams] = useState(false);
+  const [showJSON, setShowJSON] = useState(false);
+
+  const handleRunSingle = useCallback(() => {
+    runSimulation();
+  }, [runSimulation]);
+
+  const handleRunMonteCarlo = useCallback(() => {
+    runMultipleSimulations(5000);
+  }, [runMultipleSimulations]);
+
+  const handleSaveParams = useCallback(
+    (newParams: SimulationParams) => {
+      setParams(newParams);
+    },
+    [setParams],
+  );
+
+  const handleImportJSON = useCallback(
+    (newParams: SimulationParams) => {
+      setParams(newParams);
+    },
+    [setParams],
+  );
 
   return (
-    <div className="p-6 overflow-auto h-full">
-      <h1 className="text-xl font-bold mb-4">Simulation</h1>
-      <div className="flex gap-3 mb-6">
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Top bar */}
+      <div className="bg-[#333] px-3 py-2 flex items-center gap-2 shrink-0">
         <button
-          onClick={() => runSimulation()}
+          className="bg-[#2e6da4] text-white px-4 py-1.5 rounded text-sm hover:opacity-90 transition-opacity"
+          onClick={() => setShowParams(true)}
+        >
+          Parameters
+        </button>
+        <button
+          className="bg-[#2e6da4] text-white px-4 py-1.5 rounded text-sm hover:opacity-90 transition-opacity"
+          onClick={() => setShowJSON(true)}
+        >
+          JSON
+        </button>
+        <button
+          className="bg-[#2e6da4] text-white px-4 py-1.5 rounded text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          onClick={handleRunSingle}
           disabled={isRunning}
-          className="bg-[#0091ea] text-white px-4 py-2 rounded hover:bg-[#0077c2] disabled:opacity-50"
         >
           {isRunning ? 'Running...' : 'Run Simulation'}
         </button>
+        <button
+          className="bg-[#2e6da4] text-white px-4 py-1.5 rounded text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+          onClick={handleRunMonteCarlo}
+          disabled={isRunning}
+        >
+          {isRunning ? 'Running...' : 'Run Monte Carlo'}
+        </button>
       </div>
 
-      {lastSimulation && (
-        <div className="bg-[#1a1a2e] rounded-lg p-4 text-white">
-          <p className="text-sm mb-2 text-white/70">
-            Simulation completed in {lastSimulation.time.toFixed(1)} minutes
-          </p>
-          <div className="space-y-px">
-            {lastSimulation.actors
-              .filter((a) => a.type === 'Patient')
-              .map((actor) => (
-                <div key={actor.id} className="flex items-center gap-2 text-xs">
-                  <span className="w-24 text-white/60">{actor.id}</span>
-                  <div className="flex-1 h-5 relative bg-white/5 rounded overflow-hidden">
-                    {actor.timeline.map((event, i) => {
-                      const duration = (event.end ?? 0) - event.start;
-                      if (duration <= 0) return null;
-                      const left = (event.start / lastSimulation.time) * 100;
-                      const width = (duration / lastSimulation.time) * 100;
-                      return (
-                        <div
-                          key={i}
-                          className="absolute top-0 h-full opacity-80"
-                          style={{
-                            left: `${left}%`,
-                            width: `${width}%`,
-                            backgroundColor: getStateColor(event.stateCode),
-                          }}
-                          title={`${getStateLabel(event.stateCode)} (${duration.toFixed(1)} min)`}
-                        />
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+      {/* Timeline */}
+      <div className="flex-1 overflow-auto">
+        {lastSimulation ? (
+          <>
+            <Timeline
+              actors={lastSimulation.actors}
+              message="<p><strong>Hint:</strong> hover over the timeline labels to highlight relationships</p>"
+            />
+            {/* Monte Carlo charts placeholder */}
+            <div id="monte-carlo-charts" />
+          </>
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            Run a simulation to see the timeline
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {showParams && (
+        <ParameterModal
+          params={params}
+          onSave={handleSaveParams}
+          onClose={() => setShowParams(false)}
+        />
+      )}
+      {showJSON && (
+        <JSONModal
+          params={params}
+          onImport={handleImportJSON}
+          onClose={() => setShowJSON(false)}
+        />
       )}
     </div>
   );
-}
-
-function getStateColor(code: number): string {
-  const colors: Record<number, string> = {
-    101: 'transparent',
-    102: '#888',
-    103: 'rgba(224,192,0,0.6)',
-    104: 'rgba(255,0,0,0.6)',
-    105: '#339966',
-    107: 'rgba(255,96,0,0.6)',
-    108: '#336699',
-    109: '#888',
-    110: 'transparent',
-  };
-  return colors[code] ?? '#555';
-}
-
-function getStateLabel(code: number): string {
-  const labels: Record<number, string> = {
-    101: 'Before Arrival',
-    102: 'Checking In',
-    103: 'Wait (Preferred CT)',
-    104: 'Wait (Any CT)',
-    105: 'CT Meeting',
-    107: 'Wait (Attending)',
-    108: 'Attending Meeting',
-    109: 'Checking Out',
-    110: 'Finished',
-  };
-  return labels[code] ?? `State ${code}`;
 }

@@ -10,6 +10,7 @@ import { computeDFG } from '@/mining/dfg';
 import { extractVariants } from '@/mining/variants';
 import { computeHappyPath, getHappyPathElements } from '@/mining/happy-path';
 import { useMiningStore } from './mining-store';
+import type { MonteCarloResults, WorkerResponse } from '@/types/monte-carlo';
 import exampleParams from '../../example.json';
 
 export interface SimulationResult {
@@ -21,15 +22,30 @@ export interface SimulationResult {
 interface SimulationStore {
   params: SimulationParams;
   lastSimulation: SimulationResult | null;
+  monteCarloResults: MonteCarloResults | null;
   isRunning: boolean;
   setParams: (params: SimulationParams) => void;
   runSimulation: (params?: SimulationParams) => void;
   runMultipleSimulations: (count: number, params?: SimulationParams) => void;
+  runMonteCarlo: (numSamps?: number, params?: SimulationParams) => void;
+}
+
+let worker: Worker | null = null;
+
+function getWorker(): Worker {
+  if (!worker) {
+    worker = new Worker(
+      new URL('../workers/simulation-worker.ts', import.meta.url),
+      { type: 'module' },
+    );
+  }
+  return worker;
 }
 
 export const useSimulationStore = create<SimulationStore>((set, get) => ({
   params: exampleParams as SimulationParams,
   lastSimulation: null,
+  monteCarloResults: null,
   isRunning: false,
 
   setParams: (params) => set({ params }),
@@ -150,5 +166,23 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
         set({ isRunning: false });
       }
     }, 10);
+  },
+
+  runMonteCarlo: (numSamps = 100, overrideParams) => {
+    set({ isRunning: true, monteCarloResults: null });
+    const params = overrideParams ?? get().params;
+    const w = getWorker();
+
+    const handler = (e: MessageEvent<WorkerResponse>) => {
+      if (e.data.action === 'runMonteCarlo') {
+        w.removeEventListener('message', handler);
+        set({
+          monteCarloResults: e.data.results,
+          isRunning: false,
+        });
+      }
+    };
+    w.addEventListener('message', handler);
+    w.postMessage({ action: 'runMonteCarlo', params, numSamps });
   },
 }));
