@@ -221,11 +221,11 @@ export function IndexPage() {
           <NarrativeSection
             id="process"
             question="How does the clinic actually operate?"
-            answer={`We generated ${caseCount.toLocaleString()} patient encounters across 500 simulated clinic sessions and discovered ${variantCount} unique pathways — far more than the simple 5-step model on the whiteboard. The process graph reveals how different case types diverge into distinct clinical workflows.`}
+            answer={`Decomposing the 5-step whiteboard model by case type (urgent care, new patients, follow-ups) and optional activities (labs, imaging, referrals) reveals ${variantCount} distinct pathways across ${caseCount.toLocaleString()} patient encounters. The process graph below shows how these case types diverge into different clinical workflows.`}
           >
             <div className="flex gap-4">
               {/* Process Graph */}
-              <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
+              <div className="flex-1 bg-[#f8f9fa] rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
                 <ProcessGraph />
               </div>
               {/* Celonis-style right sidebar */}
@@ -250,7 +250,7 @@ export function IndexPage() {
           <NarrativeSection
             id="patterns"
             question="What patterns emerge across patient journeys?"
-            answer={`Three case types create three distinct workflows: ${caseTypeCounts.uc} urgent care visits follow a streamlined path, ${caseTypeCounts.btcNew} new patients require full workups with potential lab orders, and ${caseTypeCounts.btcFu} follow-up patients focus on medication reconciliation. Only ${happyPathPct}% of patients follow the single most common path — the rest diverge.`}
+            answer={`The clinic sees three case types: ${caseTypeCounts.uc} urgent care visits (streamlined path), ${caseTypeCounts.btcNew} new patients (full workup with possible labs/imaging), and ${caseTypeCounts.btcFu} follow-ups (medication reconciliation focus). Only ${happyPathPct}% follow the most common path. The variant explorer shows each pathway and its frequency.`}
           >
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-5 max-h-[520px] overflow-auto">
@@ -269,7 +269,7 @@ export function IndexPage() {
             id="bottleneck"
             question="Where does clinic flow break down?"
             answer={bottleneck
-              ? `The longest delay occurs at "${bottleneck.source}" → "${bottleneck.target}", adding an average of ${bottleneck.time.toFixed(1)} minutes per patient. All three case-type pathways converge at the attending handoff, creating a single point of contention that limits overall clinic throughput.`
+              ? `The longest delay occurs at "${bottleneck.source}" → "${bottleneck.target}", adding an average of ${bottleneck.time.toFixed(1)} minutes per patient. The timeline below shows a single clinic session — hover over actors to trace the handoff chain and see where time is lost.`
               : 'Analyzing bottleneck data...'}
           >
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 overflow-auto">
@@ -299,8 +299,8 @@ export function IndexPage() {
           id="next"
           question="So, should we add more clinical teams?"
           answer={bottleneck
-            ? `The simulation reveals that the bottleneck is at the attending handoff (+${bottleneck.time.toFixed(0)} min delay), not at the clinical team level. Adding more clinical teams would push more patients into the attending queue faster — potentially increasing wait times, not reducing them. The evidence points to three alternative strategies:`
-            : 'The simulation reveals the bottleneck location and suggests targeted interventions:'}
+            ? `The simulation's largest delay (+${bottleneck.time.toFixed(0)} min) occurs at "${bottleneck.source}" → "${bottleneck.target}". If this bottleneck is downstream of the clinical teams, adding more teams would push patients into the queue faster without clearing it — potentially increasing waits rather than reducing them. To fully answer this question, compare the current ${params.numClinicalTeams}-team configuration against alternatives using the interactive simulation.`
+            : 'Run the simulation to identify the bottleneck and evaluate staffing alternatives.'}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
@@ -321,7 +321,7 @@ export function IndexPage() {
               <h3 className="font-semibold text-gray-800 mb-1.5">Scheduling Optimization</h3>
               <p className="text-sm text-gray-500 leading-relaxed">
                 {caseTypeCounts.btcNew > 0
-                  ? `${caseTypeCounts.btcNew} new-patient visits take ~40% longer. Scheduling them earlier could reduce cascading delays for the ${caseTypeCounts.uc} UC patients.`
+                  ? `${caseTypeCounts.btcNew} new-patient visits require longer clinical team encounters. Staggering them earlier in the session could reduce cascading delays for the ${caseTypeCounts.uc} urgent care patients.`
                   : 'Staggering new-patient appointments earlier in the session could smooth the flow.'}
               </p>
             </div>

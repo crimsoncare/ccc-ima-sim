@@ -1,6 +1,7 @@
 /**
- * Custom React Flow node — Celonis-style rectangular activity box
- * with label INSIDE, frequency badge, and phase-based coloring.
+ * Custom React Flow node — Celonis Process Explorer style.
+ * Filled circle with activity name to the right and frequency below.
+ * Matches 01-celonis-process-graph.jpg exactly.
  */
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
@@ -23,7 +24,7 @@ function getNodeColor(label: string): string {
   if (['Case Presentation', 'Attending Examination', 'Collaborative Planning',
        'Case Update', 'Joint Assessment', 'Follow-up Plan',
        'Quick Review', 'Focused Treatment'].includes(label)) return '#1565c0';
-  return '#e65100'; // optional/special
+  return '#e65100';
 }
 
 export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
@@ -33,45 +34,48 @@ export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
   const isStartEnd = isStart || isEnd;
   const color = isStartEnd ? '#0091ea' : getNodeColor(d.label);
 
+  // Start/End: special icon circles with label to the right
   if (isStartEnd) {
     return (
-      <div className="flex flex-col items-center">
+      <div className="flex items-center gap-2">
         <Handle type="target" position={Position.Top} className="!bg-transparent !border-none !w-0 !h-0" />
         <div
-          className="flex items-center justify-center rounded-full shadow-md"
-          style={{ width: 36, height: 36, backgroundColor: color }}
+          className="flex items-center justify-center rounded-full shadow-sm shrink-0"
+          style={{ width: 28, height: 28, backgroundColor: color }}
         >
           {isStart ? (
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="white"><polygon points="5,2 14,8 5,14" /></svg>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="white"><polygon points="5,2 14,8 5,14" /></svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="white"><circle cx="8" cy="8" r="5" fill="none" stroke="white" strokeWidth="2"/><circle cx="8" cy="8" r="2.5" fill="white"/></svg>
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="white"><circle cx="8" cy="8" r="5" fill="none" stroke="white" strokeWidth="2"/><circle cx="8" cy="8" r="2.5" fill="white"/></svg>
           )}
         </div>
-        <div className="text-[9px] text-gray-400 mt-0.5 font-medium">{d.label}</div>
+        <div>
+          <div className="text-[12px] font-semibold text-gray-700 whitespace-nowrap">{d.label}</div>
+          <div className="text-[10px] text-gray-400 font-mono">{d.frequency.toLocaleString()}</div>
+        </div>
         <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-none !w-0 !h-0" />
       </div>
     );
   }
 
+  // Activity nodes: Celonis-style filled circle + right-aligned label
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex items-center gap-2.5 cursor-pointer group" title={`${d.label}\n${d.frequency} cases`}>
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-none !w-0 !h-0" />
-      {/* Rectangular activity box with label inside */}
+      {/* Filled circle */}
       <div
-        className="rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-[1.04] flex flex-col items-center justify-center px-4 py-2.5"
-        style={{ backgroundColor: color, minWidth: 160 }}
-        title={`${d.label}\n${d.frequency} cases`}
-      >
-        <div className="text-[13px] font-bold text-white text-center leading-tight whitespace-nowrap">
+        className="rounded-full shrink-0 shadow-sm transition-transform group-hover:scale-110"
+        style={{ width: 22, height: 22, backgroundColor: color }}
+      />
+      {/* Label + frequency to the right */}
+      <div className="min-w-0">
+        <div className="text-[12px] font-semibold text-gray-800 whitespace-nowrap leading-tight">
           {d.label}
         </div>
-        <div className="text-[11px] text-white/80 font-mono mt-0.5">
+        <div className="text-[10px] text-gray-400 font-mono leading-tight">
           {d.frequency.toLocaleString()}
         </div>
       </div>
-      {d.kpiValue && (
-        <div className="text-[9px] font-mono mt-0.5" style={{ color }}>{d.kpiValue}</div>
-      )}
       <Handle type="source" position={Position.Bottom} className="!bg-transparent !border-none !w-0 !h-0" />
     </div>
   );

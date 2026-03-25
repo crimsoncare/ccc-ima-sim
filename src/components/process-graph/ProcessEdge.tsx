@@ -62,8 +62,8 @@ export const ProcessEdge = memo(function ProcessEdge({
     labelY = fy;
   }
 
-  // Bold thickness: 4px (rare) → 12px (very common)
-  const strokeWidth = Math.max(4, Math.min(12, 4 + ratio * 8));
+  // Celonis thickness: 2px (rare) → 8px (very common)
+  const strokeWidth = Math.max(2, Math.min(8, 2 + ratio * 6));
   const color = d?.edgeColor ?? '#5c6bc0';
   const isDashed = ratio < 0.15;
   const throughputTime = d?.throughputTime as string | undefined;
@@ -95,12 +95,12 @@ export const ProcessEdge = memo(function ProcessEdge({
           className="flex flex-col items-center gap-0.5"
         >
           {!d?.hideLabel && (
-            <span className="text-[11px] font-mono font-bold leading-none" style={{ color }}>
+            <span className="text-[10px] font-mono text-gray-400 leading-none">
               {freq.toLocaleString()}
             </span>
           )}
           {throughputTime && (
-            <span className="text-xs font-semibold text-gray-600 bg-white/95 px-1.5 py-0.5 rounded shadow-sm leading-none whitespace-nowrap">
+            <span className="text-[10px] italic text-gray-400 leading-none whitespace-nowrap">
               {throughputTime}
             </span>
           )}
