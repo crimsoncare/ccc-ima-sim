@@ -114,8 +114,23 @@ export function IndexPage() {
           <Section
             id="process"
             title="How Patients Move Through Your Clinic"
-            subtitle="The process graph shows all observed pathways from registration through discharge. Larger nodes indicate higher case volume. Branching reveals how different case types (urgent care, new patients, follow-ups) take different paths."
+            subtitle="The process graph below maps every observed pathway from registration through discharge. Colors indicate different phases of the visit. Branching reveals how case types (urgent care, new patients, follow-ups) diverge into different clinical workflows before reconverging at checkout."
           >
+            {/* Insight callouts */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="text-xs font-semibold text-green-800">Clinical Team Phase</div>
+                <div className="text-sm text-green-700 mt-1">3 distinct pathways based on case type — new patients get full history + physical, follow-ups focus on medication review</div>
+              </div>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="text-xs font-semibold text-blue-800">Attending Phase</div>
+                <div className="text-sm text-blue-700 mt-1">The attending handoff is the convergence point — all paths funnel through here, creating the primary bottleneck</div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="text-xs font-semibold text-amber-800">Optional Activities</div>
+                <div className="text-sm text-amber-700 mt-1">Lab orders, imaging, and specialist referrals add complexity for ~25-60% of patients depending on case type</div>
+              </div>
+            </div>
             <div className="bg-white rounded-lg shadow border" style={{ height: 700 }}>
               <ProcessGraph />
             </div>
