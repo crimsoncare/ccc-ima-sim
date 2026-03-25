@@ -6,6 +6,7 @@ import { Simulation, type SimulationParams } from '@/core/simulation';
 import { Scheduler } from '@/core/scheduler';
 import { Actor } from '@/core/actor';
 import { extractEventLog } from '@/mining/event-log';
+import { extractEnrichedEventLog } from '@/mining/enriched-event-log';
 import { computeDFG } from '@/mining/dfg';
 import { extractVariants } from '@/mining/variants';
 import { computeHappyPath, getHappyPathElements } from '@/mining/happy-path';
@@ -69,8 +70,8 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
 
         set({ lastSimulation: result, isRunning: false });
 
-        // Update mining store
-        const eventLog = extractEventLog(sim);
+        // Update mining store with enriched event log (decomposed sub-activities)
+        const eventLog = extractEnrichedEventLog(sim);
         const dfg = computeDFG(eventLog);
         const variants = extractVariants(eventLog);
         const happyPath = computeHappyPath(eventLog);
@@ -180,6 +181,43 @@ export const useSimulationStore = create<SimulationStore>((set, get) => ({
           monteCarloResults: e.data.results,
           isRunning: false,
         });
+
+        // Also generate mining data from quick batch runs for the Process Explorer
+        // This creates variant diversity across multiple random runs
+        setTimeout(() => {
+          const batchSize = Math.min(numSamps, 30);
+          const allActorsCopy: Actor[] = [];
+          for (let i = 0; i < batchSize; i++) {
+            const sim = new Simulation();
+            const scheduler = new Scheduler();
+            sim.run(params, scheduler);
+            for (const actor of sim.actors) {
+              const copy = Object.create(Object.getPrototypeOf(actor));
+              Object.assign(copy, actor);
+              if (copy.type === 'Patient') {
+                copy.id = `${actor.id}_mc${i}`;
+              }
+              allActorsCopy.push(copy);
+            }
+          }
+          const combinedSim = { actors: allActorsCopy, time: 0 };
+          const eventLog = extractEnrichedEventLog(combinedSim);
+          const dfg = computeDFG(eventLog);
+          const variants = extractVariants(eventLog);
+          const happyPath = computeHappyPath(eventLog);
+
+          const miningStore = useMiningStore.getState();
+          miningStore.setEventLog(eventLog);
+          miningStore.setDFG(dfg);
+          miningStore.setVariants(variants);
+          miningStore.setHappyPath(happyPath);
+
+          if (happyPath) {
+            const elements = getHappyPathElements(happyPath);
+            miningStore.setVisibleNodes(elements.activities);
+            miningStore.setVisibleEdges(elements.edges);
+          }
+        }, 50);
       }
     };
     w.addEventListener('message', handler);

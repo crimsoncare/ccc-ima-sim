@@ -54,33 +54,20 @@ Transforms simulation output into process mining artifacts.
 - `simulation-store.ts` — Simulation params, execution, results → feeds mining store
 - `mining-store.ts` — DFG, variants, visibility, KPI settings, animation state
 
-## Known Issues (from PR #1 review)
+## Known Issues (remaining)
 
-### Critical
-- **Golden sample tests are self-referential**: They claim to verify ES5 faithfulness but use mulberry32 PRNG (different from ES5's Math.random/xorshift128+). Values were captured from TS output, not ES5. They only prove TS is deterministic with itself.
-- **Animation is NOT implemented**: Play/Stop button and speed slider exist in GraphControls but no actual animation logic, no CaseBubble component, no framer-motion usage. `isAnimating` state is never consumed.
-- **Dead dependencies**: `framer-motion` and `@dagrejs/dagre` in package.json but never imported.
-- **Legacy file duplication**: Root `js/`, `css/`, `index.html` are identical copies of `legacy/` contents.
-- **package.json repository URL**: Points to local proxy (`127.0.0.1:39083`), not GitHub.
+### Medium Priority
+- **Animation not implemented**: Play/Stop button toggles state but no actual bubble animation or timeline scrubber.
+- **Delta comparison**: Legacy supported comparing two MC runs side by side. Not ported yet.
+- **No error boundaries**: ELK.js layout or chart failures could crash the app.
+- **2.3MB single chunk**: No code splitting, no lazy routes. Should add React.lazy for routes.
+- **Process animation (Celonis)**: Pink bubbles moving along edges not implemented.
 
-### Bugs
-- `ProcessEdge.tsx:41` — `maxFreq` hardcoded to 100, never receives actual max. Edge widths wrong.
-- `simulation-store.ts:113` — `runMultipleSimulations` mutates actor IDs in-place after simulation.
-- No error boundaries anywhere — ELK.js layout failure crashes the app.
-
-### Missing vs Celonis
+### Low Priority
 - No case selection dropdown on node click (flow through / don't flow through / start with / end with)
-- No edge click → case filtering (handler exists but no UI response)
-- No animation (pink bubbles moving along edges, timeline scrubber)
-- No variant histogram drag-select
-- No throughput time histogram click-drag selection
+- No variant histogram drag-select or throughput histogram click-drag
 - No list/graph view toggle for variants
-- Node design is basic (no text inside circle, no hover state changes, no drop shadow matching Celonis)
-
-### Build/Deploy
-- `vite.config.ts` `base: '/ccc-ima-sim/'` is GitHub Pages-specific. Must be `/` for Vercel.
-- 2.2MB single chunk — no code splitting, no lazy routes, no manual chunks.
-- CI uses `npm install -g pnpm` instead of `pnpm/action-setup@v4`.
+- Zustand state is in-memory only — lost on page reload
 
 ## Deployment
 - **GitHub Pages**: Current CI deploys dist/ to Pages on push to main/master
