@@ -2,6 +2,7 @@
  * Monte Carlo simulation result charts.
  * Renders all 10 chart types using Recharts, matching legacy/index.html showMonteCarloResults().
  */
+import { useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -74,7 +75,7 @@ interface ConfidenceBandProps {
 function ConfidenceBandChart({ title, data, color, yDomain, yFormatter = formatDuration }: ConfidenceBandProps) {
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-1 text-gray-700">{title}</h3>
+      <h3 className="text-base font-bold mb-2 text-gray-800">{title}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -164,7 +165,7 @@ function ClinicEndTimeHistogram({ results }: { results: MonteCarloResults }) {
   const data = buildHistogram(times.samples, params.targetTime - 120, params.targetTime + 90, 211);
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-1 text-gray-700">Clinic End Time</h3>
+      <h3 className="text-base font-bold mb-2 text-gray-800">Clinic End Time</h3>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -289,32 +290,28 @@ function PatientsSeenChart({
     return row;
   });
 
-  // Distinct color palette instead of opacity stacking
-  const [r, g, b] = color.split(',').map(Number);
-  const palette = countValues.map((_, idx) => {
-    const t = countValues.length > 1 ? idx / (countValues.length - 1) : 0.5;
-    // Interpolate from light to dark
-    const lr = Math.round(r + (255 - r) * (1 - t) * 0.6);
-    const lg = Math.round(g + (255 - g) * (1 - t) * 0.6);
-    const lb = Math.round(b + (255 - b) * (1 - t) * 0.6);
-    return `rgb(${lr},${lg},${lb})`;
-  });
+  // Distinct categorical color palette for grouped bars
+  const GROUPED_COLORS = [
+    '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
+    '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
+  ];
+  const palette = countValues.map((_, idx) => GROUPED_COLORS[idx % GROUPED_COLORS.length]);
 
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-1 text-gray-700">{title}</h3>
+      <h3 className="text-base font-bold mb-2 text-gray-800">{title}</h3>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 11 }} />
           <Tooltip formatter={(v) => `${(v as number).toFixed(1)}%`} />
+          <Legend wrapperStyle={{ fontSize: 10 }} />
           {countValues.map((count, idx) => (
             <Bar
               key={count}
               dataKey={`c${count}`}
               name={`${count} patients`}
-              stackId="a"
               fill={palette[idx]}
               isAnimationActive={false}
             />
@@ -336,7 +333,7 @@ function SeenByPreferredChart({ results }: { results: MonteCarloResults }) {
 
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-1 text-gray-700">Seen by Preferred Provider</h3>
+      <h3 className="text-base font-bold mb-2 text-gray-800">Seen by Preferred Provider</h3>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data} margin={{ top: 5, right: 20, bottom: 5, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -392,7 +389,7 @@ function AttendingWaitingHistogram({ results }: { results: MonteCarloResults }) 
   const minOpacity = 0.2;
   return (
     <div>
-      <h3 className="text-sm font-semibold mb-1 text-gray-700">Attending Waiting for Clinical Team</h3>
+      <h3 className="text-base font-bold mb-2 text-gray-800">Attending Waiting for Clinical Team</h3>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={combined} margin={{ top: 5, right: 20, bottom: 5, left: 50 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -426,14 +423,34 @@ function AttendingWaitingHistogram({ results }: { results: MonteCarloResults }) 
   );
 }
 
-// -- Section Header -----------------------------------------------------------
+// -- Collapsible Section -------------------------------------------------------
 
-function ChartSectionHeader({ title }: { title: string }) {
+function ChartSection({ title, children, defaultOpen = true }: {
+  title: string; children: React.ReactNode; defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="col-span-1 lg:col-span-2 mt-4 first:mt-0">
-      <h3 className="text-base font-bold text-gray-800 border-l-4 border-[#0091ea] pl-3 py-1">
-        {title}
-      </h3>
+    <div className="col-span-1 lg:col-span-2 mt-2 first:mt-0">
+      <button
+        type="button"
+        className="w-full flex items-center gap-2 text-left group"
+        onClick={() => setOpen(!open)}
+      >
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-90' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        <h3 className="text-base font-bold text-gray-800 border-l-4 border-[#0091ea] pl-3 py-1 group-hover:text-blue-700 transition-colors">
+          {title}
+        </h3>
+      </button>
+      {open && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -444,30 +461,33 @@ export function MonteCarloCharts({ results }: { results: MonteCarloResults }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4">
       {/* Patient Experience */}
-      <ChartSectionHeader title="Patient Experience" />
-      <ClinicEndTimeHistogram results={results} />
-      <PatientConfidenceCharts results={results} />
+      <ChartSection title="Patient Experience">
+        <ClinicEndTimeHistogram results={results} />
+        <PatientConfidenceCharts results={results} />
+      </ChartSection>
 
       {/* Staff Utilization */}
-      <ChartSectionHeader title="Staff Utilization" />
-      <ClinicalTeamConfidenceCharts results={results} />
-      <PatientsSeenChart
-        title="Patients Seen by Clinical Team"
-        labels={results.clinicalTeams.map((c) => c.label)}
-        statsArr={results.clinicalTeams.map((c) => c.patientsSeen)}
-        color="51,153,102"
-      />
-      <PatientsSeenChart
-        title="Patients Seen by Attending"
-        labels={results.attendings.map((a) => a.label)}
-        statsArr={results.attendings.map((a) => a.patientsSeen)}
-        color="102,51,153"
-      />
+      <ChartSection title="Staff Utilization" defaultOpen={false}>
+        <ClinicalTeamConfidenceCharts results={results} />
+        <PatientsSeenChart
+          title="Patients Seen by Clinical Team"
+          labels={results.clinicalTeams.map((c) => c.label)}
+          statsArr={results.clinicalTeams.map((c) => c.patientsSeen)}
+          color="51,153,102"
+        />
+        <PatientsSeenChart
+          title="Patients Seen by Attending"
+          labels={results.attendings.map((a) => a.label)}
+          statsArr={results.attendings.map((a) => a.patientsSeen)}
+          color="102,51,153"
+        />
+      </ChartSection>
 
       {/* System Performance */}
-      <ChartSectionHeader title="System Performance" />
-      <SeenByPreferredChart results={results} />
-      <AttendingWaitingHistogram results={results} />
+      <ChartSection title="System Performance" defaultOpen={false}>
+        <SeenByPreferredChart results={results} />
+        <AttendingWaitingHistogram results={results} />
+      </ChartSection>
     </div>
   );
 }

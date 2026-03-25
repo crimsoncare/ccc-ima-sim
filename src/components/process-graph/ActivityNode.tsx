@@ -62,11 +62,11 @@ export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
         style={{ backgroundColor: color, minWidth: 130 }}
         title={`${d.label}\n${d.frequency} cases`}
       >
-        <div className="text-[11px] font-semibold text-white text-center leading-tight whitespace-nowrap">
+        <div className="text-xs font-semibold text-white text-center leading-tight whitespace-nowrap">
           {d.label}
         </div>
-        <div className="text-[10px] text-white/70 font-mono mt-0.5">
-          {d.frequency.toLocaleString()}
+        <div className="text-[10px] text-white/80 font-mono mt-0.5">
+          {d.frequency.toLocaleString()} cases
         </div>
       </div>
       {d.kpiValue && (

@@ -49,9 +49,10 @@ export const ProcessEdge = memo(function ProcessEdge({
     borderRadius: 8,
   });
 
-  // Thickness scales with frequency: 2px (rare) → 6px (very common)
-  const strokeWidth = Math.max(2, Math.min(6, 2 + (freq / Math.max(maxFreq, 1)) * 4));
+  // Thickness scales with frequency: 3px (rare) → 8px (very common) — Celonis-thick
+  const strokeWidth = Math.max(3, Math.min(8, 3 + (freq / Math.max(maxFreq, 1)) * 5));
   const color = getEdgeColor(freq, maxFreq);
+  const throughputTime = d?.throughputTime as string | undefined;
 
   return (
     <>
@@ -65,7 +66,7 @@ export const ProcessEdge = memo(function ProcessEdge({
           strokeWidth,
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
-          opacity: 0.8,
+          opacity: 0.92,
         }}
         markerEnd={markerEnd}
       />
@@ -77,9 +78,14 @@ export const ProcessEdge = memo(function ProcessEdge({
               transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
               pointerEvents: 'all',
             }}
-            className="rounded text-[9px] font-mono font-semibold cursor-pointer"
+            className="rounded cursor-pointer flex flex-col items-center"
           >
-            <span style={{ color }}>{freq.toLocaleString()}</span>
+            <span className="text-[10px] font-mono font-bold" style={{ color }}>{freq.toLocaleString()}</span>
+            {throughputTime && (
+              <span className="text-[10px] font-mono font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-px rounded-full shadow-sm">
+                {throughputTime}
+              </span>
+            )}
           </div>
         </EdgeLabelRenderer>
       )}

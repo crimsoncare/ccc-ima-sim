@@ -84,9 +84,9 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
       layoutOptions: {
         'elk.algorithm': 'layered',
         'elk.direction': 'DOWN',
-        'elk.spacing.nodeNode': '50',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '70',
-        'elk.layered.spacing.edgeNodeBetweenLayers': '30',
+        'elk.spacing.nodeNode': '55',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '80',
+        'elk.layered.spacing.edgeNodeBetweenLayers': '35',
         'elk.edgeRouting': 'ORTHOGONAL',
       },
       children: filteredNodes.map((n) => ({
@@ -140,16 +140,20 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           : 0;
         const maxFrequency = Math.max(...filteredEdges.map(e => e.frequency), 1);
 
-        const newEdges: Edge[] = filteredEdges.map((e) => ({
+        const newEdges: Edge[] = filteredEdges.map((e) => {
+          // Match arrow color to edge color
+          const ratio = maxFrequency > 0 ? Math.min(e.frequency / maxFrequency, 1) : 0.5;
+          const arrowColor = ratio > 0.7 ? '#1a237e' : ratio > 0.4 ? '#1565c0' : ratio > 0.15 ? '#42a5f5' : '#90caf9';
+          return {
           id: `${e.source}->${e.target}`,
           source: e.source,
           target: e.target,
           type: 'process',
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 10,
-            height: 10,
-            color: '#1565c0',
+            width: 12,
+            height: 12,
+            color: arrowColor,
           },
           data: {
             frequency: e.frequency,
@@ -160,7 +164,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
                 ? `${convertTimeUnit(computeThroughputTime(e, aggregationMethod), timeUnit).toFixed(1)}${getTimeUnitLabel(timeUnit)}`
                 : undefined,
           },
-        }));
+        };});
 
         setNodes(newNodes);
         setEdges(newEdges);
@@ -194,7 +198,7 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.3, maxZoom: 0.65 }}
+        fitViewOptions={{ padding: 0.2, maxZoom: 0.9 }}
         minZoom={0.15}
         maxZoom={2}
         proOptions={{ hideAttribution: true }}

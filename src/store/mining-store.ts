@@ -72,7 +72,7 @@ export const useMiningStore = create<MiningStore>((set, get) => ({
   visibleEdges: new Set(),
   selectedVariantIds: new Set(),
   selectedCaseIds: null,
-  kpiType: 'frequency',
+  kpiType: 'throughput_time',
   aggregationMethod: 'median',
   timeUnit: 'minutes',
   activityMetric: 'flow_through',

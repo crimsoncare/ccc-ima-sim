@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSimulationStore } from '@/store/simulation-store';
 import { useMiningStore } from '@/store/mining-store';
 import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
@@ -11,9 +11,9 @@ import { computeAllThroughputTimes } from '@/mining/throughput';
 // ── KPI metric ────────────────────────────────────────────
 function Metric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
-    <div className="text-center">
-      <div className={`text-3xl font-extrabold ${accent ? 'text-red-600' : 'text-gray-900'}`}>{value}</div>
-      <div className="text-[11px] text-gray-400 uppercase tracking-wider mt-1">{label}</div>
+    <div className="text-center px-4 border-r border-gray-100 last:border-r-0">
+      <div className={`text-4xl font-extrabold tracking-tight ${accent ? 'text-red-600' : 'text-gray-900'}`}>{value}</div>
+      <div className="text-[11px] text-gray-400 uppercase tracking-wider mt-1.5">{label}</div>
     </div>
   );
 }
@@ -83,6 +83,26 @@ export function IndexPage() {
     { id: 'next', label: 'Next Steps' },
   ];
 
+  // Track active section via IntersectionObserver
+  const [activeSection, setActiveSection] = useState('overview');
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: '-40% 0px -55% 0px' },
+    );
+    for (const s of sections) {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    }
+    return () => observer.disconnect();
+  }, [lastSimulation]); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <div className="bg-gray-50 relative">
       {/* Sticky section nav */}
@@ -93,7 +113,11 @@ export function IndexPage() {
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="text-xs px-3 py-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-t transition-colors"
+                className={`text-xs px-3 py-2 rounded-t transition-colors border-b-2 ${
+                  activeSection === s.id
+                    ? 'text-blue-700 border-blue-600 font-semibold bg-blue-50/60'
+                    : 'text-gray-500 border-transparent hover:text-gray-900 hover:bg-gray-100'
+                }`}
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth' });
@@ -111,10 +135,13 @@ export function IndexPage() {
         <div id="overview" className="mb-12 scroll-mt-12">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Clinic Performance Analysis
-              </h1>
-              <p className="text-gray-400 mt-1 text-sm">
+              <div className="flex items-center gap-3 mb-1">
+                <div className="w-1 h-8 rounded-full bg-gradient-to-b from-blue-600 to-blue-400" />
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Clinic Performance Analysis
+                </h1>
+              </div>
+              <p className="text-gray-400 mt-1 text-sm ml-[19px]">
                 Crimson Care Collaborative — Internal Medicine Associates, Massachusetts General Hospital
               </p>
             </div>
@@ -150,7 +177,7 @@ export function IndexPage() {
             question="How does the clinic actually operate?"
             answer={`We generated ${caseCount.toLocaleString()} patient encounters across 500 simulated clinic sessions and discovered ${variantCount} unique pathways — far more than the simple 5-step model on the whiteboard. The process graph reveals how different case types diverge into distinct clinical workflows.`}
           >
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 650 }}>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
               <ProcessGraph />
             </div>
             <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
@@ -221,7 +248,7 @@ export function IndexPage() {
           answer="Process mining turns operational data into actionable insights. Here's what we recommend investigating further."
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mb-3">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1565c0" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
@@ -232,7 +259,7 @@ export function IndexPage() {
                   : 'The attending handoff is the primary bottleneck. Consider overlapping attending schedules.'}
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mb-3">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
@@ -243,7 +270,7 @@ export function IndexPage() {
                   : 'Staggering new-patient appointments earlier in the session could smooth the flow.'}
               </p>
             </div>
-            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
               <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mb-3">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e65100" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
               </div>
