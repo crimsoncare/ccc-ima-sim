@@ -25,6 +25,12 @@ export function VariantExplorerPage() {
     );
   }
 
+  const totalCases = variants?.reduce((sum, v) => sum + v.frequency, 0) ?? 0;
+  const selectedCases = variants
+    ?.filter((v) => selectedVariantIds.has(v.id))
+    .reduce((sum, v) => sum + v.frequency, 0) ?? 0;
+  const coveragePct = totalCases > 0 ? ((selectedCases / totalCases) * 100).toFixed(0) : '0';
+
   return (
     <div className="flex h-full">
       {/* Process graph for selected variants */}
@@ -35,10 +41,24 @@ export function VariantExplorerPage() {
       {/* Variant panel on the right */}
       <div className="w-80 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
         <div className="p-3 border-b border-gray-200">
-          <h2 className="font-semibold">Variants</h2>
-          <p className="text-xs text-gray-500 mt-1">
-            {selectedVariantIds.size} of {variants?.length ?? 0} variants selected
+          <h2 className="font-semibold text-base">Variant Explorer</h2>
+          <p className="text-[11px] text-gray-500 mt-1 leading-snug">
+            A variant is an end-to-end trace through the clinic process. Each patient follows exactly one variant per visit.
           </p>
+          <div className="flex gap-3 mt-2">
+            <div className="bg-gray-50 rounded px-2 py-1 text-center flex-1">
+              <div className="text-sm font-bold text-gray-800">{variants?.length ?? 0}</div>
+              <div className="text-[10px] text-gray-500">variants</div>
+            </div>
+            <div className="bg-gray-50 rounded px-2 py-1 text-center flex-1">
+              <div className="text-sm font-bold text-gray-800">{selectedVariantIds.size}</div>
+              <div className="text-[10px] text-gray-500">selected</div>
+            </div>
+            <div className="bg-gray-50 rounded px-2 py-1 text-center flex-1">
+              <div className="text-sm font-bold text-[#0091ea]">{coveragePct}%</div>
+              <div className="text-[10px] text-gray-500">coverage</div>
+            </div>
+          </div>
         </div>
         <div className="flex-1 overflow-auto">
           <VariantHistogram />

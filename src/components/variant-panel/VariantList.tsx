@@ -1,7 +1,26 @@
 /**
- * List of process variants with activity sequences.
+ * List of process variants with color-coded activity sequences.
  */
 import { useMiningStore } from '@/store/mining-store';
+
+function getActivityColor(activity: string): string {
+  // Registration / waiting phase
+  if (['Registration', 'Vitals & Triage', 'Waiting Room', 'Queue Reassignment'].includes(activity)) return '#6b7280';
+  // Clinical team phase
+  if (['History Taking', 'Physical Examination', 'Clinical Assessment', 'Care Planning',
+       'Chart Review', 'Medication Reconciliation', 'Progress Assessment',
+       'Chief Complaint', 'Focused Examination', 'Treatment Plan'].includes(activity)) return '#339966';
+  // Handoff
+  if (['CT-Attending Handoff', 'Case Discussion'].includes(activity)) return '#2d8989';
+  // Attending phase
+  if (['Case Presentation', 'Attending Examination', 'Collaborative Planning',
+       'Case Update', 'Joint Assessment', 'Follow-up Plan',
+       'Quick Review', 'Focused Treatment'].includes(activity)) return '#336699';
+  // Checkout
+  if (['Discharge Instructions', 'Follow-up Scheduling'].includes(activity)) return '#6b7280';
+  // Optional/special
+  return '#d97706';
+}
 
 export function VariantList() {
   const { variants, selectedVariantIds, toggleVariant, setSelectedVariantIds } =
@@ -10,19 +29,23 @@ export function VariantList() {
   if (!variants || variants.length === 0) return null;
 
   const selectedCount = variants.filter((v) => selectedVariantIds.has(v.id)).length;
-  const totalCasesCovered = variants
-    .filter((v) => selectedVariantIds.has(v.id))
-    .reduce((sum, v) => sum + v.frequency, 0);
   const totalCases = variants.reduce((sum, v) => sum + v.frequency, 0);
-  const coveragePercent = totalCases > 0 ? ((totalCasesCovered / totalCases) * 100).toFixed(0) : '0';
+  const maxFrequency = variants[0]?.frequency ?? 1;
 
   return (
     <div className="p-3">
+      {/* Header */}
+      <div className="mb-3">
+        <h3 className="text-sm font-semibold text-gray-800">Variants</h3>
+        <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+          Each variant represents a unique patient journey through the clinic. The most common variants cover the majority of cases.
+        </p>
+      </div>
+
       {/* Controls */}
       <div className="flex items-center justify-between mb-2">
         <button
           onClick={() => {
-            // Show fewer: keep only top N
             const top = variants.slice(0, Math.max(1, selectedCount - 1));
             setSelectedVariantIds(new Set(top.map((v) => v.id)));
           }}
@@ -31,9 +54,7 @@ export function VariantList() {
           Less
         </button>
         <button
-          onClick={() => {
-            setSelectedVariantIds(new Set(variants.map((v) => v.id)));
-          }}
+          onClick={() => setSelectedVariantIds(new Set(variants.map((v) => v.id)))}
           className="text-xs px-2 py-1 border rounded hover:bg-gray-50"
         >
           ⟲
@@ -50,52 +71,57 @@ export function VariantList() {
         </button>
       </div>
 
-      {/* Stats */}
-      <div className="flex justify-between text-xs text-gray-500 mb-3 bg-gray-50 rounded p-2">
-        <div>
-          <span className="font-semibold text-gray-700">{selectedCount}</span>{' '}
-          of {variants.length} variants
-        </div>
-        <div>
-          <span className="font-semibold text-gray-700">{coveragePercent}%</span>{' '}
-          of cases covered
-        </div>
-      </div>
-
-      {/* Variant list */}
+      {/* Variant cards */}
       <div className="space-y-2">
-        {variants.map((variant) => (
-          <div
-            key={variant.id}
-            onClick={() => toggleVariant(variant.id)}
-            className={`
-              p-2 rounded border cursor-pointer transition-colors text-xs
-              ${selectedVariantIds.has(variant.id)
-                ? 'border-[#0091ea] bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-              }
-            `}
-          >
-            <div className="flex justify-between items-center mb-1">
-              <span className="font-semibold">{variant.id}</span>
-              <span className="text-gray-500">
-                {variant.frequency} cases ({variant.percentage.toFixed(1)}%)
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {variant.activities.map((activity, i) => (
-                <span key={i} className="flex items-center gap-0.5">
-                  <span className="bg-[#ff8c00] text-white px-1 py-0.5 rounded text-[9px]">
-                    {activity}
-                  </span>
-                  {i < variant.activities.length - 1 && (
-                    <span className="text-gray-400">→</span>
-                  )}
+        {variants.map((variant) => {
+          const selected = selectedVariantIds.has(variant.id);
+          const barWidth = (variant.frequency / maxFrequency) * 100;
+          return (
+            <div
+              key={variant.id}
+              onClick={() => toggleVariant(variant.id)}
+              className={`p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                selected ? 'border-[#0091ea] bg-blue-50/60' : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              {/* Top row: variant id + stats */}
+              <div className="flex justify-between items-center mb-1.5">
+                <span className="text-xs font-bold text-gray-800">{variant.id}</span>
+                <span className="text-[11px] text-gray-500">
+                  {variant.frequency} cases · {variant.percentage.toFixed(1)}%
                 </span>
-              ))}
+              </div>
+
+              {/* Frequency bar */}
+              <div className="h-1.5 bg-gray-100 rounded-full mb-2 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${barWidth}%`,
+                    backgroundColor: selected ? '#0091ea' : '#94a3b8',
+                  }}
+                />
+              </div>
+
+              {/* Activity pills with arrows */}
+              <div className="flex flex-wrap items-center gap-y-1">
+                {variant.activities.map((activity, i) => (
+                  <span key={i} className="flex items-center">
+                    <span
+                      className="text-white px-1.5 py-0.5 rounded text-[10px] leading-tight whitespace-nowrap"
+                      style={{ backgroundColor: getActivityColor(activity) }}
+                    >
+                      {activity}
+                    </span>
+                    {i < variant.activities.length - 1 && (
+                      <span className="text-gray-300 mx-0.5 text-[10px]">→</span>
+                    )}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
