@@ -1,7 +1,8 @@
 /**
  * Main Process Graph component using React Flow + ELK.js for layout.
+ * Celonis-style multicolor edges based on clinical phase.
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   Controls,
@@ -26,6 +27,49 @@ const elk = new ELK();
 const nodeTypes = { activity: ActivityNode };
 const edgeTypes = { process: ProcessEdge };
 
+// Phase-based edge colors — creates Celonis multicolor effect
+const PHASE_COLORS: Record<string, string> = {
+  // Registration/intake phase: slate/gray
+  'Registration': '#78909c',
+  'Vitals & Triage': '#78909c',
+  // Waiting: amber
+  'Waiting Room': '#f59e0b',
+  'Queue Reassignment': '#f59e0b',
+  // Clinical Team phase: rich green
+  'History Taking': '#2e7d32',
+  'Physical Examination': '#2e7d32',
+  'Clinical Assessment': '#2e7d32',
+  'Care Planning': '#2e7d32',
+  'Chart Review': '#2e7d32',
+  'Medication Reconciliation': '#388e3c',
+  'Progress Assessment': '#388e3c',
+  'Chief Complaint': '#43a047',
+  'Focused Examination': '#43a047',
+  'Treatment Plan': '#43a047',
+  // Handoff: teal
+  'CT-Attending Handoff': '#00897b',
+  'Case Discussion': '#00897b',
+  // Attending phase: deep purple
+  'Case Presentation': '#5e35b1',
+  'Attending Examination': '#5e35b1',
+  'Collaborative Planning': '#7e57c2',
+  'Case Update': '#7e57c2',
+  'Joint Assessment': '#7e57c2',
+  'Follow-up Plan': '#7e57c2',
+  'Quick Review': '#9575cd',
+  'Focused Treatment': '#9575cd',
+  // Checkout: slate
+  'Discharge Instructions': '#546e7a',
+  'Follow-up Scheduling': '#546e7a',
+  // Start/End
+  'Process Start': '#0091ea',
+  'Process End': '#0091ea',
+};
+
+function getEdgePhaseColor(sourceActivity: string): string {
+  return PHASE_COLORS[sourceActivity] ?? '#e65100'; // orange for optional/labs
+}
+
 interface ProcessGraphProps {
   mode?: 'explorer' | 'variant';
 }
@@ -49,20 +93,16 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Compute graph to display based on mode
   const activeDFG = useMemo(() => {
     if (!dfg || !eventLog || !variants) return dfg;
-
     if (mode === 'variant' && selectedVariantIds.size < (variants?.length ?? 0)) {
       const selectedVars = variants.filter((v) => selectedVariantIds.has(v.id));
       const caseIds = getCasesForVariants(selectedVars);
       return computeDFGForCases(eventLog, caseIds);
     }
-
     return dfg;
   }, [dfg, eventLog, variants, mode, selectedVariantIds]);
 
-  // Layout with ELK.js
   useEffect(() => {
     if (!activeDFG) return;
 
@@ -77,20 +117,21 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         : true,
     );
 
+    // Dramatically more spacing — Celonis-level breathing room
     const elkGraph: ElkNode = {
       id: 'root',
       layoutOptions: {
         'elk.algorithm': 'layered',
         'elk.direction': 'DOWN',
-        'elk.spacing.nodeNode': '55',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '80',
-        'elk.layered.spacing.edgeNodeBetweenLayers': '35',
+        'elk.spacing.nodeNode': '80',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '120',
+        'elk.layered.spacing.edgeNodeBetweenLayers': '50',
         'elk.edgeRouting': 'ORTHOGONAL',
       },
       children: filteredNodes.map((n) => ({
         id: n.activity,
-        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 40 : 145,
-        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 55 : 50,
+        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 44 : 170,
+        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 58 : 54,
       })),
       edges: filteredEdges.map((e, i) => ({
         id: `e-${i}`,
@@ -107,15 +148,10 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           const throughputStr =
             kpiType === 'throughput_time'
               ? (() => {
-                  const edgesForNode = filteredEdges.filter(
-                    (e) => e.target === dfgNode.activity,
-                  );
+                  const edgesForNode = filteredEdges.filter((e) => e.target === dfgNode.activity);
                   if (edgesForNode.length === 0) return undefined;
                   const avgTime =
-                    edgesForNode.reduce(
-                      (sum, e) => sum + computeThroughputTime(e, aggregationMethod),
-                      0,
-                    ) / edgesForNode.length;
+                    edgesForNode.reduce((sum, e) => sum + computeThroughputTime(e, aggregationMethod), 0) / edgesForNode.length;
                   return `${convertTimeUnit(avgTime, timeUnit).toFixed(1)}${getTimeUnitLabel(timeUnit)}`;
                 })()
               : undefined;
@@ -132,18 +168,15 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           };
         });
 
-        // Compute frequency threshold and max for edge styling
         const freqThreshold = filteredEdges.length > 10
           ? filteredEdges.map(e => e.frequency).sort((a, b) => a - b)[Math.floor(filteredEdges.length * 0.3)]
           : 0;
         const maxFrequency = Math.max(...filteredEdges.map(e => e.frequency), 1);
 
         const newEdges: Edge[] = filteredEdges.map((e) => {
-          // Match arrow color to edge color
-          const ratio = maxFrequency > 0 ? Math.min(e.frequency / maxFrequency, 1) : 0.5;
-          const arrowColor = ratio > 0.7 ? '#1a237e' : ratio > 0.4 ? '#1565c0' : ratio > 0.15 ? '#42a5f5' : '#80deea';
+          // Phase-based color from source activity
+          const edgeColor = getEdgePhaseColor(e.source);
 
-          // Always compute throughput time for Celonis-style edge labels
           const tTime = computeThroughputTime(e, aggregationMethod);
           const tConverted = convertTimeUnit(tTime, timeUnit);
           const timeLabel = tConverted > 0
@@ -151,23 +184,25 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
             : undefined;
 
           return {
-          id: `${e.source}->${e.target}`,
-          source: e.source,
-          target: e.target,
-          type: 'process',
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            width: 12,
-            height: 12,
-            color: arrowColor,
-          },
-          data: {
-            frequency: e.frequency,
-            maxFrequency,
-            hideLabel: e.frequency < freqThreshold,
-            throughputTime: timeLabel,
-          },
-        };});
+            id: `${e.source}->${e.target}`,
+            source: e.source,
+            target: e.target,
+            type: 'process',
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 14,
+              height: 14,
+              color: edgeColor,
+            },
+            data: {
+              frequency: e.frequency,
+              maxFrequency,
+              hideLabel: e.frequency < freqThreshold,
+              throughputTime: timeLabel,
+              edgeColor,
+            },
+          };
+        });
 
         setNodes(newNodes);
         setEdges(newEdges);
@@ -176,16 +211,13 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
   }, [activeDFG, visibleNodes, visibleEdges, mode, kpiType, aggregationMethod, timeUnit]);
 
   const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      setSelectedActivity(node.id);
-    },
+    (_event: React.MouseEvent, node: Node) => setSelectedActivity(node.id),
     [setSelectedActivity],
   );
 
   const onEdgeClick = useCallback(
-    (_event: React.MouseEvent, edge: Edge) => {
-      setSelectedEdge({ source: edge.source, target: edge.target });
-    },
+    (_event: React.MouseEvent, edge: Edge) =>
+      setSelectedEdge({ source: edge.source, target: edge.target }),
     [setSelectedEdge],
   );
 
@@ -201,9 +233,9 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2, maxZoom: 0.9 }}
-        minZoom={0.15}
-        maxZoom={2}
+        fitViewOptions={{ padding: 0.15, maxZoom: 1.0 }}
+        minZoom={0.1}
+        maxZoom={2.5}
         proOptions={{ hideAttribution: true }}
       >
         <Controls position="top-right" />
@@ -212,11 +244,10 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           nodeColor={(node) =>
             node.id === PROCESS_START || node.id === PROCESS_END
               ? '#0091ea'
-              : '#ff8c00'
+              : PHASE_COLORS[node.id] ?? '#e65100'
           }
           position="bottom-right"
         />
-        {/* Clean white background — Celonis standard (no dots/grid) */}
       </ReactFlow>
     </div>
   );

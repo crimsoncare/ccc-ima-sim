@@ -1,7 +1,7 @@
 /**
- * Custom React Flow edge — Celonis-style with orthogonal routing,
- * thickness proportional to frequency, dashed lines for rare paths,
- * and throughput time labels on every edge.
+ * Custom React Flow edge — Celonis-style multicolor edges.
+ * Color is determined by the clinical phase of the SOURCE activity,
+ * creating distinct visual flows like Celonis's purple/teal/cyan/orange paths.
  */
 import { memo } from 'react';
 import {
@@ -15,16 +15,8 @@ export interface ProcessEdgeData {
   maxFrequency?: number;
   hideLabel?: boolean;
   throughputTime?: string;
+  edgeColor?: string; // Phase-based color from ProcessGraph
   [key: string]: unknown;
-}
-
-// Frequency → color (cyan for rare → deep indigo for common, matching classic Celonis)
-function getEdgeColor(freq: number, maxFreq: number): string {
-  const ratio = maxFreq > 0 ? Math.min(freq / maxFreq, 1) : 0.5;
-  if (ratio > 0.7) return '#1a237e'; // deep indigo — high-frequency
-  if (ratio > 0.4) return '#1565c0'; // medium blue
-  if (ratio > 0.15) return '#42a5f5'; // light blue
-  return '#80deea'; // cyan — rare paths (Celonis classic)
 }
 
 export const ProcessEdge = memo(function ProcessEdge({
@@ -47,16 +39,19 @@ export const ProcessEdge = memo(function ProcessEdge({
   const [edgePath, labelX, labelY] = getSmoothStepPath({
     sourceX, sourceY, sourcePosition,
     targetX, targetY, targetPosition,
-    borderRadius: 8,
+    borderRadius: 12,
   });
 
-  // Thickness: 2px (rare) → 8px (very common)
-  const strokeWidth = Math.max(2, Math.min(8, 2 + ratio * 6));
-  const color = getEdgeColor(freq, maxFreq);
-  const throughputTime = d?.throughputTime as string | undefined;
+  // Bold thickness: 4px (rare) → 12px (very common) — Celonis-heavy
+  const strokeWidth = Math.max(4, Math.min(12, 4 + ratio * 8));
 
-  // Dashed for low-frequency edges (Celonis classic pattern)
-  const isDashed = ratio < 0.2;
+  // Phase-based color from data, fallback to indigo
+  const color = d?.edgeColor ?? '#5c6bc0';
+
+  // Dashed for low-frequency edges
+  const isDashed = ratio < 0.15;
+
+  const throughputTime = d?.throughputTime as string | undefined;
 
   return (
     <>
@@ -70,12 +65,11 @@ export const ProcessEdge = memo(function ProcessEdge({
           strokeWidth,
           strokeLinecap: 'round',
           strokeLinejoin: 'round',
-          strokeDasharray: isDashed ? '8 4' : undefined,
-          opacity: 0.9,
+          strokeDasharray: isDashed ? '10 5' : undefined,
+          opacity: 0.85,
         }}
         markerEnd={markerEnd}
       />
-      {/* Always show throughput time; only hide frequency count on low-freq edges */}
       <EdgeLabelRenderer>
         <div
           style={{
@@ -91,7 +85,7 @@ export const ProcessEdge = memo(function ProcessEdge({
             </span>
           )}
           {throughputTime && (
-            <span className="text-xs font-semibold text-gray-600 bg-white/90 px-1 rounded leading-none whitespace-nowrap shadow-sm">
+            <span className="text-xs font-semibold text-gray-600 bg-white/95 px-1.5 py-0.5 rounded shadow-sm leading-none whitespace-nowrap">
               {throughputTime}
             </span>
           )}

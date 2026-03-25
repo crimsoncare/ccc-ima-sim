@@ -58,15 +58,15 @@ export const ActivityNode = memo(function ActivityNode({ data }: NodeProps) {
       <Handle type="target" position={Position.Top} className="!bg-transparent !border-none !w-0 !h-0" />
       {/* Rectangular activity box with label inside */}
       <div
-        className="rounded-lg shadow-md cursor-pointer transition-all hover:shadow-lg hover:scale-[1.03] flex flex-col items-center justify-center px-3 py-2"
-        style={{ backgroundColor: color, minWidth: 130 }}
+        className="rounded-lg shadow-lg cursor-pointer transition-all hover:shadow-xl hover:scale-[1.04] flex flex-col items-center justify-center px-4 py-2.5"
+        style={{ backgroundColor: color, minWidth: 160 }}
         title={`${d.label}\n${d.frequency} cases`}
       >
-        <div className="text-xs font-semibold text-white text-center leading-tight whitespace-nowrap">
+        <div className="text-[13px] font-bold text-white text-center leading-tight whitespace-nowrap">
           {d.label}
         </div>
-        <div className="text-[10px] text-white/80 font-mono mt-0.5">
-          {d.frequency.toLocaleString()} cases
+        <div className="text-[11px] text-white/80 font-mono mt-0.5">
+          {d.frequency.toLocaleString()}
         </div>
       </div>
       {d.kpiValue && (
