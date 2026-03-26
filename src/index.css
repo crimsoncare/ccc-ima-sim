@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --celonis-orange: #ff6900;
+  --celonis-blue: #0091ea;
+  --celonis-dark: #1a1a2e;
+  --celonis-gray: #f5f5f5;
+  --celonis-node-active: #ff8c00;
+  --celonis-node-start: #0091ea;
+  --celonis-edge: #0091ea;
+  --celonis-edge-light: #b3d9f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background: #f8f9fa;
+  color: #333;
+}
+
+/* React Flow overrides for Celonis-like styling */
+.react-flow__node {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.react-flow__edge-path {
+  stroke: var(--celonis-edge);
+  stroke-width: 2;
+}
+
+.react-flow__edge-text {
+  font-size: 11px;
+  fill: #555;
+}
+
+.react-flow__controls {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
