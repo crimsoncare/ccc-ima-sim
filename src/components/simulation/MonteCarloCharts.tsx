@@ -2,7 +2,6 @@
  * Monte Carlo simulation result charts.
  * Renders all 10 chart types using Recharts, matching legacy/index.html showMonteCarloResults().
  */
-import { useState } from 'react';
 import {
   AreaChart,
   Area,
@@ -423,34 +422,12 @@ function AttendingWaitingHistogram({ results }: { results: MonteCarloResults }) 
   );
 }
 
-// -- Collapsible Section -------------------------------------------------------
-
-function ChartSection({ title, children, defaultOpen = true }: {
-  title: string; children: React.ReactNode; defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
+function SectionHeader({ title }: { title: string }) {
   return (
-    <div className="col-span-1 lg:col-span-2 mt-2 first:mt-0">
-      <button
-        type="button"
-        className="w-full flex items-center gap-2 text-left group"
-        onClick={() => setOpen(!open)}
-      >
-        <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${open ? 'rotate-90' : ''}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-        <h3 className="text-base font-bold text-gray-800 border-l-4 border-[#0091ea] pl-3 py-1 group-hover:text-blue-700 transition-colors">
-          {title}
-        </h3>
-      </button>
-      {open && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
-          {children}
-        </div>
-      )}
+    <div className="col-span-1 lg:col-span-2 mt-4 first:mt-0">
+      <h3 className="text-base font-bold text-gray-800 border-l-4 border-[#0091ea] pl-3 py-1">
+        {title}
+      </h3>
     </div>
   );
 }
@@ -487,34 +464,28 @@ export function MonteCarloCharts({ results }: { results: MonteCarloResults }) {
         <SummaryKPI value={`${preferredRate.toFixed(0)}%`} label="Preferred Provider" color="text-green-600" />
       </div>
 
-      {/* Patient Experience */}
-      <ChartSection title="Patient Experience">
-        <ClinicEndTimeHistogram results={results} />
-        <PatientConfidenceCharts results={results} />
-      </ChartSection>
+      <SectionHeader title="Patient Experience" />
+      <ClinicEndTimeHistogram results={results} />
+      <PatientConfidenceCharts results={results} />
 
-      {/* Staff Utilization */}
-      <ChartSection title="Staff Utilization" defaultOpen={false}>
-        <ClinicalTeamConfidenceCharts results={results} />
-        <PatientsSeenChart
-          title="Patients Seen by Clinical Team"
-          labels={results.clinicalTeams.map((c) => c.label)}
-          statsArr={results.clinicalTeams.map((c) => c.patientsSeen)}
-          color="51,153,102"
-        />
-        <PatientsSeenChart
-          title="Patients Seen by Attending"
-          labels={results.attendings.map((a) => a.label)}
-          statsArr={results.attendings.map((a) => a.patientsSeen)}
-          color="102,51,153"
-        />
-      </ChartSection>
+      <SectionHeader title="Staff Utilization" />
+      <ClinicalTeamConfidenceCharts results={results} />
+      <PatientsSeenChart
+        title="Patients Seen by Clinical Team"
+        labels={results.clinicalTeams.map((c) => c.label)}
+        statsArr={results.clinicalTeams.map((c) => c.patientsSeen)}
+        color="51,153,102"
+      />
+      <PatientsSeenChart
+        title="Patients Seen by Attending"
+        labels={results.attendings.map((a) => a.label)}
+        statsArr={results.attendings.map((a) => a.patientsSeen)}
+        color="102,51,153"
+      />
 
-      {/* System Performance */}
-      <ChartSection title="System Performance" defaultOpen={false}>
-        <SeenByPreferredChart results={results} />
-        <AttendingWaitingHistogram results={results} />
-      </ChartSection>
+      <SectionHeader title="System Performance" />
+      <SeenByPreferredChart results={results} />
+      <AttendingWaitingHistogram results={results} />
     </div>
   );
 }

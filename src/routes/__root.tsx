@@ -3,10 +3,6 @@ import { OnboardingGuide } from '@/components/shared/OnboardingGuide';
 
 const navItems = [
   { to: '/', label: 'Dashboard' },
-  { to: '/process-explorer', label: 'Process Explorer' },
-  { to: '/variant-explorer', label: 'Variant Explorer' },
-  { to: '/throughput-time', label: 'Throughput Time' },
-  { to: '/activity-search', label: 'Activity Search' },
   { to: '/simulation', label: 'Simulation' },
 ] as const;
 
