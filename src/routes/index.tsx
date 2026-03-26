@@ -4,6 +4,7 @@ import { useMiningStore } from '@/store/mining-store';
 import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
 import { GraphControls } from '@/components/process-graph/GraphControls';
 import { WorkflowChevron } from '@/components/workflow/WorkflowChevron';
+import { DetailPanel } from '@/components/process-graph/DetailPanel';
 import { VariantList } from '@/components/variant-panel/VariantList';
 import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
 import { MonteCarloCharts } from '@/components/simulation/MonteCarloCharts';
@@ -44,7 +45,7 @@ export function IndexPage() {
   useEffect(() => {
     if (!lastSimulation && !isRunning) {
       runSimulation();
-      setTimeout(() => runMonteCarlo(5000), 500);
+      setTimeout(() => runMonteCarlo(10000), 500);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,7 +53,7 @@ export function IndexPage() {
   useEffect(() => {
     if (monteCarloResults && !comparisonResults && !isComparingRunning) {
       const altParams = { ...params, numClinicalTeams: 6 };
-      runComparison('6 Clinical Teams', altParams, 2000);
+      runComparison('6 Clinical Teams', altParams, 5000);
     }
   }, [monteCarloResults]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -251,14 +252,18 @@ export function IndexPage() {
                 <GraphControls />
               </div>
             </div>
-            <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
+            {/* Detail panel for selected node/edge */}
+            <div className="mt-3">
+              <DetailPanel />
+            </div>
+            <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-400">
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#607d8b] inline-block" /> Registration</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#ef6c00] inline-block" /> Waiting</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#2e7d32] inline-block" /> Clinical Team</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#00796b] inline-block" /> Handoff</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#1565c0] inline-block" /> Attending</span>
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-[#e65100] inline-block" /> Optional</span>
-              <span className="ml-auto">Scroll to zoom. Drag to pan.</span>
+              <span className="ml-auto">Hover edges for details. Click to select.</span>
             </div>
           </NarrativeSection>
         )}
@@ -304,7 +309,7 @@ export function IndexPage() {
           <NarrativeSection
             id="evidence"
             question="How confident are these findings?"
-            answer="We validated the simulation across 5,000 independent clinic sessions (40,000 patient encounters). The shaded bands show the 5th-to-95th percentile range — the findings are consistent and robust, not artifacts of a single lucky run."
+            answer="We validated the simulation across 10,000 independent clinic sessions (80,000 patient encounters). The shaded bands show the 5th-to-95th percentile range — the findings are consistent and robust, not artifacts of a single lucky run."
           >
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
               <MonteCarloCharts results={monteCarloResults} />

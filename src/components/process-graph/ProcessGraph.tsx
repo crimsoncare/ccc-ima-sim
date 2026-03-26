@@ -159,8 +159,8 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
       },
       children: filteredNodes.map((n) => ({
         id: n.activity,
-        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 140 : 200,
-        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 32 : 32,
+        width: n.activity === PROCESS_START || n.activity === PROCESS_END ? 160 : 220,
+        height: n.activity === PROCESS_START || n.activity === PROCESS_END ? 44 : 46,
       })),
       edges: filteredEdges.map((e, i) => ({
         id: `e-${i}`,
@@ -245,8 +245,8 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           type: 'process',
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 10,
-            height: 10,
+            width: 7,
+            height: 7,
             color: edgeColor,
           },
           data: {
