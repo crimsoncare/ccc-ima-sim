@@ -229,12 +229,22 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
 
           elkPath = elkPointsToRoundedPath(pathPoints);
 
-          // Label position at midpoint of path
-          const midIdx = Math.floor(pathPoints.length / 2);
-          const midPt = pathPoints[midIdx];
-          if (midPt) {
-            elkLabelX = midPt.x;
-            elkLabelY = midPt.y;
+          // Parametric label placement: 40% from source, min 25px from endpoints
+          // This avoids arrowheads (near target) and source overlap
+          const segs = pathPoints.map((p, idx) =>
+            idx === 0 ? 0 : Math.hypot(p.x - pathPoints[idx - 1].x, p.y - pathPoints[idx - 1].y)
+          );
+          const total = segs.reduce((a, b) => a + b, 0);
+          const target = Math.max(25, Math.min(total - 25, total * 0.4));
+          let walked = 0;
+          for (let idx = 1; idx < pathPoints.length; idx++) {
+            if (walked + segs[idx] >= target) {
+              const t = (target - walked) / segs[idx];
+              elkLabelX = pathPoints[idx - 1].x + t * (pathPoints[idx].x - pathPoints[idx - 1].x);
+              elkLabelY = pathPoints[idx - 1].y + t * (pathPoints[idx].y - pathPoints[idx - 1].y);
+              break;
+            }
+            walked += segs[idx];
           }
         }
 
