@@ -136,13 +136,13 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
         'elk.direction': 'DOWN',
         'elk.edgeRouting': 'ORTHOGONAL',
 
-        // Generous spacing for Celonis-level breathing room
-        'elk.spacing.nodeNode': '80',
-        'elk.layered.spacing.nodeNodeBetweenLayers': '120',
+        // Compact but readable spacing
+        'elk.spacing.nodeNode': '60',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '55',
 
-        // KEY: Separate parallel edge tracks (subway lines)
-        'elk.layered.spacing.edgeEdgeBetweenLayers': '25',
-        'elk.layered.spacing.edgeNodeBetweenLayers': '40',
+        // Separate parallel edge tracks
+        'elk.layered.spacing.edgeEdgeBetweenLayers': '15',
+        'elk.layered.spacing.edgeNodeBetweenLayers': '20',
 
         // Straighten edges and use better node placement
         'elk.layered.nodePlacement.favorStraightEdges': 'true',
@@ -229,19 +229,30 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
 
           elkPath = elkPointsToRoundedPath(pathPoints);
 
-          // Parametric label placement: 40% from source, min 25px from endpoints
-          // This avoids arrowheads (near target) and source overlap
+          // Label placement: 35% from source, offset LEFT of the edge so it doesn't overlap the line
           const segs = pathPoints.map((p, idx) =>
             idx === 0 ? 0 : Math.hypot(p.x - pathPoints[idx - 1].x, p.y - pathPoints[idx - 1].y)
           );
           const total = segs.reduce((a, b) => a + b, 0);
-          const target = Math.max(25, Math.min(total - 25, total * 0.4));
+          const target = Math.max(20, Math.min(total - 20, total * 0.35));
           let walked = 0;
           for (let idx = 1; idx < pathPoints.length; idx++) {
             if (walked + segs[idx] >= target) {
               const t = (target - walked) / segs[idx];
-              elkLabelX = pathPoints[idx - 1].x + t * (pathPoints[idx].x - pathPoints[idx - 1].x);
-              elkLabelY = pathPoints[idx - 1].y + t * (pathPoints[idx].y - pathPoints[idx - 1].y);
+              const px = pathPoints[idx - 1].x + t * (pathPoints[idx].x - pathPoints[idx - 1].x);
+              const py = pathPoints[idx - 1].y + t * (pathPoints[idx].y - pathPoints[idx - 1].y);
+              // Compute perpendicular offset (left of direction of travel)
+              const dx = pathPoints[idx].x - pathPoints[idx - 1].x;
+              const dy = pathPoints[idx].y - pathPoints[idx - 1].y;
+              const len = Math.hypot(dx, dy);
+              if (len > 0) {
+                // Perpendicular: (-dy, dx) normalized, offset by 16px
+                elkLabelX = px + (-dy / len) * 16;
+                elkLabelY = py + (dx / len) * 16;
+              } else {
+                elkLabelX = px + 16;
+                elkLabelY = py;
+              }
               break;
             }
             walked += segs[idx];
@@ -255,8 +266,8 @@ export function ProcessGraph({ mode = 'explorer' }: ProcessGraphProps) {
           type: 'process',
           markerEnd: {
             type: MarkerType.ArrowClosed,
-            width: 7,
-            height: 7,
+            width: 5,
+            height: 5,
             color: edgeColor,
           },
           data: {
