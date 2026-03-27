@@ -1,6 +1,6 @@
 import { VariantList } from '@/components/variant-panel/VariantList';
 import { VariantHistogram } from '@/components/variant-panel/VariantHistogram';
-import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
+import { SvgProcessGraph } from '@/components/process-graph/SvgProcessGraph';
 import { useMiningStore } from '@/store/mining-store';
 import { useSimulationStore } from '@/store/simulation-store';
 import { useEnsureSimulation } from '@/hooks/useEnsureSimulation';
@@ -37,7 +37,7 @@ export function VariantExplorerPage() {
     <div className="flex h-full">
       {/* Process graph for selected variants */}
       <div className="flex-1 relative">
-        <ProcessGraph mode="variant" />
+        <SvgProcessGraph mode="variant" />
       </div>
 
       {/* Variant panel on the right */}

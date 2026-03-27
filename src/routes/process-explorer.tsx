@@ -1,4 +1,4 @@
-import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
+import { SvgProcessGraph } from '@/components/process-graph/SvgProcessGraph';
 import { GraphControls } from '@/components/process-graph/GraphControls';
 import { useMiningStore } from '@/store/mining-store';
 import { useSimulationStore } from '@/store/simulation-store';
@@ -29,7 +29,7 @@ export function ProcessExplorerPage() {
   return (
     <div className="flex h-full">
       <div className="flex-1 relative">
-        <ProcessGraph />
+        <SvgProcessGraph />
         <GraphControls />
       </div>
     </div>

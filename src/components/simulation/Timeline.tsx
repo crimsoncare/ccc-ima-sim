@@ -2,55 +2,55 @@ import { useState, useMemo, useCallback } from 'react';
 import { Actor, StateCodes, StateLabels } from '@/core/actor';
 import { Simulation } from '@/core/simulation';
 
-// Color map keyed by state code — matches legacy CSS exactly
+// Color map keyed by state code — light-mode palette with solid fills and visible outlines
 const STATE_COLORS: Record<number, { bg: string; color: string; border?: string }> = {
   // Patient states
   [StateCodes.PATIENT_BEFORE_ARRIVAL]: { bg: 'transparent', color: 'transparent' },
-  [StateCodes.PATIENT_CHECKING_IN]: { bg: 'rgba(127,127,127,0.4)', color: 'rgba(0,0,0,0.5)' },
+  [StateCodes.PATIENT_CHECKING_IN]: { bg: '#b0bec5', color: '#fff' },
   [StateCodes.PATIENT_WAITING_FOR_PREFERRED_CLINICAL_TEAM]: {
-    bg: 'rgba(224,192,0,0.1)', color: 'rgba(224,192,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(224,192,0,0.6)',
+    bg: '#fff8e1', color: '#f9a825',
+    border: 'inset 0 0 0 1.5px #f9a825',
   },
   [StateCodes.PATIENT_WAITING_FOR_ANY_CLINICAL_TEAM]: {
-    bg: 'rgba(255,0,0,0.1)', color: 'rgba(255,0,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,0,0,0.6)',
+    bg: '#ffebee', color: '#e53935',
+    border: 'inset 0 0 0 1.5px #e53935',
   },
-  [StateCodes.PATIENT_CLINICAL_TEAM_MEETING]: { bg: 'rgb(51,153,102)', color: 'rgba(255,255,255,0.5)' },
+  [StateCodes.PATIENT_CLINICAL_TEAM_MEETING]: { bg: '#2e7d32', color: '#fff' },
   [StateCodes.PATIENT_WAITING_FOR_ATTENDING]: {
-    bg: 'rgba(255,96,0,0.1)', color: 'rgba(255,96,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,96,0,0.6)',
+    bg: '#fff3e0', color: '#ef6c00',
+    border: 'inset 0 0 0 1.5px #ef6c00',
   },
-  [StateCodes.PATIENT_ATTENDING_MEETING]: { bg: 'rgb(51,102,160)', color: 'rgba(255,255,255,0.5)' },
-  [StateCodes.PATIENT_CHECKING_OUT]: { bg: 'rgba(127,127,127,0.4)', color: 'rgba(0,0,0,0.5)' },
+  [StateCodes.PATIENT_ATTENDING_MEETING]: { bg: '#1565c0', color: '#fff' },
+  [StateCodes.PATIENT_CHECKING_OUT]: { bg: '#b0bec5', color: '#fff' },
   [StateCodes.PATIENT_FINISHED]: { bg: 'transparent', color: 'transparent' },
   // ClinicalTeam states
-  [StateCodes.CLINICAL_TEAM_GROUP_HUDDLE]: { bg: 'rgba(127,127,127,0.4)', color: 'rgba(0,0,0,0.5)' },
+  [StateCodes.CLINICAL_TEAM_GROUP_HUDDLE]: { bg: '#b0bec5', color: '#fff' },
   [StateCodes.CLINICAL_TEAM_WAITING_FOR_PATIENT]: {
-    bg: 'rgba(255,96,0,0.1)', color: 'rgba(255,96,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,96,0,0.6)',
+    bg: '#fff3e0', color: '#ef6c00',
+    border: 'inset 0 0 0 1.5px #ef6c00',
   },
   [StateCodes.CLINICAL_TEAM_WAITING_FOR_PREFERRED_ATTENDING]: {
-    bg: 'rgba(224,192,0,0.1)', color: 'rgba(224,192,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(224,192,0,0.6)',
+    bg: '#fff8e1', color: '#f9a825',
+    border: 'inset 0 0 0 1.5px #f9a825',
   },
   [StateCodes.CLINICAL_TEAM_WAITING_FOR_ANY_ATTENDING]: {
-    bg: 'rgba(255,0,0,0.1)', color: 'rgba(255,0,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,0,0,0.6)',
+    bg: '#ffebee', color: '#e53935',
+    border: 'inset 0 0 0 1.5px #e53935',
   },
-  [StateCodes.CLINICAL_TEAM_ATTENDING_MEETING]: { bg: 'rgb(51,125,135)', color: 'rgba(255,255,255,0.5)' },
+  [StateCodes.CLINICAL_TEAM_ATTENDING_MEETING]: { bg: '#00796b', color: '#fff' },
   [StateCodes.CLINICAL_TEAM_WAITING_FOR_PATIENT_ATTENDING_MEETING]: {
-    bg: 'rgba(255,96,0,0.1)', color: 'rgba(255,96,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,96,0,0.6)',
+    bg: '#fff3e0', color: '#ef6c00',
+    border: 'inset 0 0 0 1.5px #ef6c00',
   },
   // Attending states
   [StateCodes.ATTENDING_WAITING_FOR_FIRST_CLINICAL_TEAM]: { bg: 'transparent', color: 'transparent' },
   [StateCodes.ATTENDING_WAITING_FOR_CLINICAL_TEAM]: {
-    bg: 'rgba(255,96,0,0.1)', color: 'rgba(255,96,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,96,0,0.6)',
+    bg: '#fff3e0', color: '#ef6c00',
+    border: 'inset 0 0 0 1.5px #ef6c00',
   },
   [StateCodes.ATTENDING_WAITING_FOR_PATIENT_ATTENDING_MEETING]: {
-    bg: 'rgba(255,96,0,0.1)', color: 'rgba(255,96,0,0.5)',
-    border: 'inset 0 0 0 1px rgba(255,96,0,0.6)',
+    bg: '#fff3e0', color: '#ef6c00',
+    border: 'inset 0 0 0 1.5px #ef6c00',
   },
 };
 
@@ -110,9 +110,9 @@ export function Timeline({ actors, message }: TimelineProps) {
   const timelineWidth = TOTAL_TICKS * 15 * SCALE;
 
   return (
-    <div className="bg-[#222] p-6 text-[#888] text-sm" style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}>
+    <div className="bg-gray-50 rounded-lg p-6 text-gray-500 text-sm border border-gray-200" style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}>
       {message && (
-        <div className="mb-2 text-xs" dangerouslySetInnerHTML={{ __html: message }} />
+        <div className="mb-2 text-xs text-gray-500" dangerouslySetInnerHTML={{ __html: message }} />
       )}
       {/* Time axis top */}
       <TimeRow
@@ -169,14 +169,14 @@ export function Timeline({ actors, message }: TimelineProps) {
         isLast={false}
       />
       {/* Color legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 pt-3 border-t border-white/10 text-[11px]">
-        <LegendItem color="rgb(51,153,102)" label="CT Meeting" />
-        <LegendItem color="rgb(51,125,135)" label="CT-Attending Meeting" />
-        <LegendItem color="rgb(51,102,160)" label="Attending Meeting" />
-        <LegendItem color="rgba(127,127,127,0.5)" label="Check-in / Check-out" />
-        <LegendItem color="rgba(224,192,0,0.6)" label="Wait (preferred)" border />
-        <LegendItem color="rgba(255,96,0,0.6)" label="Wait (attending)" border />
-        <LegendItem color="rgba(255,0,0,0.6)" label="Wait (any available)" border />
+      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 pt-3 border-t border-gray-200 text-[11px]">
+        <LegendItem color="#2e7d32" label="CT Meeting" />
+        <LegendItem color="#00796b" label="CT-Attending Meeting" />
+        <LegendItem color="#1565c0" label="Attending Meeting" />
+        <LegendItem color="#b0bec5" label="Check-in / Check-out" />
+        <LegendItem color="#f9a825" label="Wait (preferred)" border />
+        <LegendItem color="#ef6c00" label="Wait (attending)" border />
+        <LegendItem color="#e53935" label="Wait (any available)" border />
       </div>
     </div>
   );
@@ -193,7 +193,7 @@ interface TimeRowProps {
 
 function LegendItem({ color, label, border }: { color: string; label: string; border?: boolean }) {
   return (
-    <span className="flex items-center gap-1.5 text-gray-400">
+    <span className="flex items-center gap-1.5 text-gray-500">
       <span
         className="w-3 h-3 rounded-sm inline-block shrink-0"
         style={border
@@ -222,7 +222,7 @@ function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeav
     >
       {/* Label */}
       <div
-        className="shrink-0 overflow-hidden cursor-pointer select-none text-ellipsis whitespace-nowrap"
+        className="shrink-0 overflow-hidden cursor-pointer select-none text-ellipsis whitespace-nowrap text-gray-600"
         style={{ width: '10em' }}
         onMouseEnter={actor ? () => onMouseEnter(actor.id) : undefined}
         onMouseLeave={actor ? onMouseLeave : undefined}
@@ -243,8 +243,8 @@ function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeav
                 left: time * SCALE,
                 width: 15 * SCALE,
                 height: '1.6em',
-                borderLeft: '1px solid rgba(127,127,127,0.4)',
-                color: isTimeAxis ? 'rgba(127,127,127,0.7)' : 'transparent',
+                borderLeft: '1px solid #e0e0e0',
+                color: isTimeAxis ? '#9e9e9e' : 'transparent',
                 textAlign: 'left',
                 paddingLeft: '0.5em',
                 fontSize: '85%',
@@ -260,7 +260,7 @@ function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeav
           const end = event.end ?? 0;
           const duration = end - event.start;
           if (duration <= 0) return null;
-          const style = STATE_COLORS[event.stateCode] ?? { bg: '#555', color: '#aaa' };
+          const style = STATE_COLORS[event.stateCode] ?? { bg: '#90a4ae', color: '#fff' };
           if (style.bg === 'transparent') return null;
           const label = Math.round(duration);
           return (
@@ -274,10 +274,11 @@ function TimeRow({ actor, timelineWidth, highlightSet, onMouseEnter, onMouseLeav
                 lineHeight: '1.6em',
                 background: style.bg,
                 color: style.color,
-                boxShadow: style.border ?? 'inset 0 0 0 1px rgba(0,0,0,0.25)',
-                borderLeft: '1px solid #222',
-                opacity: 0.9,
-                fontSize: duration * SCALE < 20 ? '0' : 'inherit',
+                boxShadow: style.border ?? 'none',
+                borderLeft: '1px solid #f5f5f5',
+                borderRadius: '1px',
+                fontSize: duration * SCALE < 20 ? '0' : '11px',
+                fontWeight: 600,
                 overflow: 'hidden',
               }}
               title={`${StateLabels[event.stateCode]} (${duration.toFixed(1)} min)`}

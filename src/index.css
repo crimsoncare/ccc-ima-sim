@@ -22,23 +22,3 @@ body {
   background: #f8f9fa;
   color: #333;
 }
-
-/* React Flow overrides for Celonis-like styling */
-.react-flow__node {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.react-flow__edge-path {
-  stroke: var(--celonis-edge);
-  stroke-width: 2;
-}
-
-.react-flow__edge-text {
-  font-size: 11px;
-  fill: #555;
-}
-
-.react-flow__controls {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}

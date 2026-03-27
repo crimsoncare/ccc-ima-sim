@@ -4,7 +4,8 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './router';
 import './index.css';
 
-const router = createRouter({ routeTree, basepath: '/ccc-ima-sim' });
+const basepath = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+const router = createRouter({ routeTree, basepath });
 
 declare module '@tanstack/react-router' {
   interface Register {

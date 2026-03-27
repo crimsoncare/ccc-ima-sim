@@ -19,7 +19,6 @@
   "license": "ISC",
   "dependencies": {
     "@tanstack/react-router": "^1.168.3",
-    "@xyflow/react": "^12.10.1",
     "elkjs": "^0.11.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

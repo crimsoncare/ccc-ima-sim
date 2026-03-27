@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { useSimulationStore } from '@/store/simulation-store';
 import { useMiningStore } from '@/store/mining-store';
-import { ProcessGraph } from '@/components/process-graph/ProcessGraph';
+import { SvgProcessGraph } from '@/components/process-graph/SvgProcessGraph';
 import { GraphControls } from '@/components/process-graph/GraphControls';
 import { WorkflowChevron } from '@/components/workflow/WorkflowChevron';
 import { DetailPanel } from '@/components/process-graph/DetailPanel';
@@ -245,7 +246,7 @@ export function IndexPage() {
             <div className="flex gap-4">
               {/* Process Graph */}
               <div className="flex-1 bg-[#f8f9fa] rounded-xl shadow-sm border border-gray-200" style={{ height: 800 }}>
-                <ProcessGraph />
+                <SvgProcessGraph />
               </div>
               {/* Celonis-style right sidebar */}
               <div className="w-48 shrink-0 bg-white rounded-xl shadow-sm border border-gray-200 p-4 overflow-auto" style={{ height: 800 }}>
@@ -394,10 +395,10 @@ export function IndexPage() {
             </div>
           </div>
           <div className="mt-4 text-center">
-            <a href="/ccc-ima-sim/simulation" className="inline-flex items-center gap-1.5 text-sm text-[#0091ea] font-medium hover:underline">
+            <Link to="/simulation" className="inline-flex items-center gap-1.5 text-sm text-[#0091ea] font-medium hover:underline">
               Explore the interactive simulation
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
+            </Link>
           </div>
         </NarrativeSection>
 
